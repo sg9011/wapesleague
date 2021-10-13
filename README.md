@@ -3,7 +3,9 @@
 ### What is this repository for? ###
 
 This Repo Is For the WaPesLeague MixBot
-The Bot will run in discord and make it easy to sign in and out of a mix.
+The Bot will run in discord and make it easy to sign in and out of a mix room.
+A mix room is a 11 vs 11 football game room to which players can subscribe to a position.
+The bot manages the creation and closing of the rooms aswell aswell as the user interactions to that room.
 
 ### How does it work? ###
 
@@ -11,14 +13,7 @@ This is a web application that will run the .Bot project.
 It will spin up a hostedservice to run the bot that listens to Discord commands
 We connect to discord with the DSharpPlus package.
 
-1) CreateARoom
-	--> this will create a mixgroup Containing 1 channel and 1 Session linked to the channel
-2) In 		[team]  [pos] [extraInfo][]
-3) Out
-4) Set [server], [Password], [@RoomOwner]
-	SetServer
-	SetPassword
-	SetOwner
+
 
 ### Contribution guidelines ###
 

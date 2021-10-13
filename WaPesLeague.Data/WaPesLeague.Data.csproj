@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Entities\ELO\**" />
+    <Compile Remove="Entities\PictureType\**" />
+    <Compile Remove="Entities\SocialMedia\**" />
+    <EmbeddedResource Remove="Entities\ELO\**" />
+    <EmbeddedResource Remove="Entities\PictureType\**" />
+    <EmbeddedResource Remove="Entities\SocialMedia\**" />
+    <None Remove="Entities\ELO\**" />
+    <None Remove="Entities\PictureType\**" />
+    <None Remove="Entities\SocialMedia\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Entities\Association\Competition.cs" />
+    <Compile Remove="Entities\Association\Enums\LeagueType.cs" />
+    <Compile Remove="Entities\Association\Enums\RegistrationType.cs" />
+    <Compile Remove="Entities\Association\Federation.cs" />
+    <Compile Remove="Entities\Association\FederationSeason.cs" />
+    <Compile Remove="Entities\Association\FederationSeasonCompetition.cs" />
+    <Compile Remove="Entities\Association\FederationSeasonCompetitionRound.cs" />
+    <Compile Remove="Entities\Association\FederationSeasonCompetitionRoundSocialMedia.cs" />
+    <Compile Remove="Entities\Association\FederationSeasonRegistration.cs" />
+    <Compile Remove="Entities\Association\FederationSocialMedia.cs" />
+    <Compile Remove="Entities\Match\MatchPictureType.cs" />
+    <Compile Remove="Entities\Match\MatchSocialMedia.cs" />
+    <Compile Remove="Entities\User\Configurations\UserPictureTypeConfiguration.cs" />
+    <Compile Remove="Entities\User\Configurations\UserSocialMediaConfiguration.cs" />
+    <Compile Remove="Entities\User\UserPictureType.cs" />
+    <Compile Remove="Entities\User\UserSocialMedia.cs" />
+  </ItemGroup>
+
+  <!--<ItemGroup>
+    <Compile Remove="Entities\User\Configurations\UserPictureTypeConfiguration.cs" />
+    <Compile Remove="Entities\User\Configurations\UserSocialMediaConfiguration.cs" />
+  </ItemGroup>-->
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WaPesLeague.Constants\WaPesLeague.Constants.csproj" />
+  </ItemGroup>
+
+</Project>

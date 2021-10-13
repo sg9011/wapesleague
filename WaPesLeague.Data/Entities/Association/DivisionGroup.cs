@@ -1,0 +1,16 @@
+﻿using System.Collections.Generic;
+
+namespace WaPesLeague.Data.Entities.Association
+{
+    public class DivisionGroup
+    {
+        public int DivisionGroupId { get; set; }
+        public int DivisionRoundId { get; set; }
+        public string Name { get; set; }
+        public int Order { get; set; }
+
+        public virtual DivisionRound DivisionRound { get; set;}
+        public virtual List<DivisionGroupRound> DivisionGroupRounds { get; set; }
+
+    }
+}

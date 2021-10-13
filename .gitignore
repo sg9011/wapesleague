@@ -18,11 +18,14 @@ nupkg/
 *.userosscache
 *.sln.docstates
 
-#appsettings
+# Appsettings
 appsettings.json
 *.local.json
 *.locallive.json
 *.live.json
+
+# Support
+Support/
 
 # Build results
 [Dd]ebug/

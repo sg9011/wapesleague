@@ -23,6 +23,7 @@ appsettings.json
 *.local.json
 *.locallive.json
 *.live.json
+*googlesettings.json
 
 # Support
 Support/

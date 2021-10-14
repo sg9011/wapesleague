@@ -75,6 +75,7 @@ namespace WaPesLeague.Data
             modelBuilder.ApplyConfiguration(new ServerFormationConfiguration());
             modelBuilder.ApplyConfiguration(new ServerFormationPositionConfiguration());
             modelBuilder.ApplyConfiguration(new ServerFormationTagConfiguration());
+            modelBuilder.ApplyConfiguration(new ServerRoleConfiguration());
 
             modelBuilder.ApplyConfiguration(new PlatformConfiguration());
 

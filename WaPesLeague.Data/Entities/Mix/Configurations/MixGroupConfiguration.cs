@@ -19,6 +19,10 @@ namespace WaPesLeague.Data.Entities.Mix.Configurations
                 .WithOne(mc => mc.MixGroup)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasMany(mx => mx.MixGroupRoleOpenings)
+                .WithOne(mc => mc.MixGroup)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasOne(mx => mx.Server)
                 .WithMany(s => s.MixGroups)
                 .HasForeignKey(mx => mx.ServerId);

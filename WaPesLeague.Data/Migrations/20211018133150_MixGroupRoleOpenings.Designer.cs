@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WaPesLeague.Data;
 
 namespace WaPesLeague.Data.Migrations
 {
     [DbContext(typeof(WaPesDbContext))]
-    partial class WaPesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211018133150_MixGroupRoleOpenings")]
+    partial class MixGroupRoleOpenings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

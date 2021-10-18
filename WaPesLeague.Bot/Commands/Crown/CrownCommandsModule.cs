@@ -20,7 +20,6 @@ namespace WaPesLeague.Bot.Commands.Crown
 
         }
 
-
         [Command("Crown")]
         [Description("Assign the crown to a user")]
         public async Task SetCrown(CommandContext ctx,
@@ -38,7 +37,7 @@ namespace WaPesLeague.Bot.Commands.Crown
                     await member.ModifyAsync(m => m.Nickname = newNickName);
                 }
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 var a = "Z";
             }
@@ -75,7 +74,7 @@ namespace WaPesLeague.Bot.Commands.Crown
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 var a = "Z";
             }
@@ -161,7 +160,7 @@ namespace WaPesLeague.Bot.Commands.Crown
                     return;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
         }

@@ -40,6 +40,7 @@ namespace WaPesLeague.Data
         public DbSet<ServerFormationPosition> ServerFormationPositions { get; set; }
         public DbSet<ServerTeam> ServerTeams { get; set; }
         public DbSet<ServerTeamTag> ServerTeamTags { get; set; }
+        public DbSet<ServerRole> ServerRoles { get; set; }
 
 
         public DbSet<MixGroup> MixGroups { get; set; }
@@ -47,6 +48,7 @@ namespace WaPesLeague.Data
         public DbSet<MixChannelTeam> MixChannelTeams { get; set; }
         public DbSet<MixChannelTeamPosition> MixChannelTeamPositions { get; set; }
         public DbSet<MixChannelTeamTag> MixChannelTeamTags { get; set; }
+        public DbSet<MixGroupRoleOpening> MixGroupRoleOpenings { get; set; }
 
         public DbSet<MixSession> MixSessions { get; set; }
         public DbSet<MixTeam> MixTeams { get; set; }

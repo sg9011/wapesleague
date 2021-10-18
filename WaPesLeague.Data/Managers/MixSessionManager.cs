@@ -134,18 +134,41 @@ namespace WaPesLeague.Data.Managers
                     && ms.MixChannel.MixGroup.IsActive == true);
         }
 
-        public async Task<bool> HasOpenMixSessionByDiscordIds(string discordServerid, string discordChannelId, DateTime time)
+        public async Task<MixGroupIdAndRegistrationTime> HasOpenMixSessionByDiscordIds(string discordServerid, string discordChannelId, DateTime time)
         {
-            return await _context.MixSessions
-                .AnyAsync(ms => 
+            var mixSession = await _context.MixSessions
+                .Include(ms => ms.MixChannel)
+                .AsNoTracking()
+                .SingleOrDefaultAsync(ms =>
                     ms.MixChannel.DiscordChannelId == discordChannelId
                     && ms.MixChannel.MixGroup.Server.DiscordServerId == discordServerid
                     && ms.MixChannel.MixGroup.Server.IsActive == true
                     && ms.MixChannel.MixGroup.IsActive
                     && ms.MixChannel.Enabled == true
-                    && ms.DateRegistrationOpening < time
+                    //&& ms.DateRegistrationOpening < time
                     && ms.DateToClose > time &&
                     ms.DateClosed == null);
+
+            if (mixSession == null)
+                return null;
+
+            return new MixGroupIdAndRegistrationTime()
+            {
+                MixGroupId = mixSession.MixChannel.MixGroupId,
+                RegistrationTime = mixSession.DateRegistrationOpening
+            };
+
+            //return await _context.MixSessions
+
+            //    .AnyAsync(ms => 
+            //        ms.MixChannel.DiscordChannelId == discordChannelId
+            //        && ms.MixChannel.MixGroup.Server.DiscordServerId == discordServerid
+            //        && ms.MixChannel.MixGroup.Server.IsActive == true
+            //        && ms.MixChannel.MixGroup.IsActive
+            //        && ms.MixChannel.Enabled == true
+            //        //&& ms.DateRegistrationOpening < time
+            //        && ms.DateToClose > time &&
+            //        ms.DateClosed == null);
         }
 
         public async Task<bool> CheckIfExtraMixSessionShouldBeCreatedAsync(int mixGroupId)

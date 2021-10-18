@@ -11,7 +11,7 @@ namespace WaPesLeague.Data.Managers.Interfaces
         public Task<MixSession> GetCurrentMixSessionByChannelIdAsync(int mixChannelId);
         public Task<MixSession> GetMixSessionByIdAsync(int mixSessionId, int serverId);
         public Task<MixSession> GetActiveMixSessionByServerIdAndDiscordChannelIdAsync(int serverId, string discordchannelId);
-        public Task<bool> HasOpenMixSessionByDiscordIds(string discordServerid, string disordChannelId, DateTime time);
+        public Task<MixGroupIdAndRegistrationTime> HasOpenMixSessionByDiscordIds(string discordServerid, string disordChannelId, DateTime time);
         public Task<bool> CheckIfExtraMixSessionShouldBeCreatedAsync(int mixGroupId);
         public Task<MixSession> AddAsync(MixSession mixSession);
         public Task<MixSession> UpdateAsync(MixSession mixSession);

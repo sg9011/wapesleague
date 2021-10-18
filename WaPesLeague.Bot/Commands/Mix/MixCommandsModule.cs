@@ -14,6 +14,7 @@ using WaPesLeague.Bot.Commands.Base;
 using Microsoft.Extensions.Logging;
 using WaPesLeague.Constants.Resources;
 using WaPesLeague.Constants;
+using System.Collections.Generic;
 
 namespace WaPesLeague.Bot.Commands.Mix
 {
@@ -115,7 +116,8 @@ namespace WaPesLeague.Bot.Commands.Mix
                 {
                     Team = team,
                     Position = position,
-                    ExtraInfo = extraInfo
+                    ExtraInfo = extraInfo,
+                    RoleIdsPlayer1 = ctx.Member?.Roles?.Select(r => r.Id.ToString()).ToList() ?? new List<string>()
                 });
             }
             catch (Exception ex)
@@ -145,7 +147,8 @@ namespace WaPesLeague.Bot.Commands.Mix
                 {
                     Team = team,
                     Position = position,
-                    ExtraInfo = extraInfo
+                    ExtraInfo = extraInfo,
+                    RoleIdsPlayer1 = ctx.Member?.Roles?.Select(r => r.Id.ToString()).ToList() ?? new List<string>()
                 });
             }
             catch (Exception ex)
@@ -597,7 +600,11 @@ namespace WaPesLeague.Bot.Commands.Mix
                 MixRequestQueue.Queue.Enqueue(new MixRequestDto(MixRequestType.Swap, discordCommandProps, server)
                 {
                     Player1 = discordCommandPropsPlayer1,
-                    Player2 = discordCommandPropsPlayer2
+                    RoleIdsPlayer1 = player1.Roles?.Select(r => r.Id.ToString()).ToList() ?? new List<string>(),
+                    Player2 = discordCommandPropsPlayer2,
+                    RoleIdsPlayer2 = player2 != null
+                        ? player2.Roles?.Select(r => r.Id.ToString()).ToList() ?? new List<string>()
+                        : ctx.Member.Roles?.Select(r => r.Id.ToString()).ToList() ?? new List<string>()
                 });
             }
             catch(Exception ex)
@@ -624,6 +631,38 @@ namespace WaPesLeague.Bot.Commands.Mix
 
                 var discordCommandProps = new DiscordCommandProperties(ctx);
                 MixRequestQueue.Queue.Enqueue(new MixRequestDto(MixRequestType.OpenTeam, discordCommandProps, server));
+            }
+            catch (Exception ex)
+            {
+                await ctx.RespondAsync(string.Format(ErrorMessages.BaseError.GetValueForLanguage(), ex.Message));
+            }
+        }
+
+        [Command("EarlyRoleRegistration"), Aliases("EarlyRole", "EarlyRegistration")]
+        [Description("Set a registration in minutes that you want to open earlier relative to the normal registration time for a role in a certain MixGroup")]
+        public async Task RoleRegistration(CommandContext ctx, DiscordRole role, int minutes)
+        {
+            try
+            {
+                if (ctx.Guild == null)
+                {
+                    await ReplyToFailedRequest(ctx.Message, ErrorMessages.PrivateServerNotAllowedError.GetValueForLanguage());
+                    return;
+                }
+
+                var server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
+
+                if (!await ValidateHasTopTierRolesAsync(ctx))
+                    return;
+
+
+                var discordCommandProps = new DiscordCommandProperties(ctx);
+                MixRequestQueue.Queue.Enqueue(new MixRequestDto(MixRequestType.RoleRegistration, discordCommandProps, server)
+                {
+                    RoleId = role.Id,
+                    RoleName = role.Name,
+                    Minutes = minutes * -1
+                });
             }
             catch (Exception ex)
             {

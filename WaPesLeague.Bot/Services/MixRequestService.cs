@@ -123,6 +123,9 @@ namespace WaPesLeague.Bot.Services
                                     case MixRequestType.Swap:
                                         result = await HandleSwapAsync(mixRequestDto, scope);
                                         break;
+                                    case MixRequestType.RoleRegistration:
+                                        result = await HandleRoleRegistrationAsync(mixRequestDto, scope);
+                                        break;
                                     default:
                                         Logger.LogError(new ArgumentException($"{mixRequestDto.RequestType} is not supported in the Hosted service: MixRequestService"), $"{mixRequestDto.RequestType} is not supported in the Hosted service: MixRequestService");
                                         break;
@@ -176,7 +179,7 @@ namespace WaPesLeague.Bot.Services
             var _mixSessionWorkflow = scope.ServiceProvider.GetRequiredService<IMixSessionWorkflow>();
             var userId = await _userWorkflow.GetOrCreateUserIdByDiscordId(_mapper.Map<DiscordCommandPropsDto>(mixRequestDto.DiscordCommandProps));
 
-            var signInDto = new SignInDto(mixRequestDto.DiscordCommandProps.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, userId, mixRequestDto.Team, mixRequestDto.Position, mixRequestDto.ExtraInfo, mixRequestDto.Server.ServerId);
+            var signInDto = new SignInDto(mixRequestDto.DiscordCommandProps.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, userId, mixRequestDto.Team, mixRequestDto.Position, mixRequestDto.ExtraInfo, mixRequestDto.Server.ServerId, mixRequestDto.RoleIdsPlayer1);
 
             return await _mixSessionWorkflow.SignInAsync(signInDto);
         }
@@ -276,6 +279,12 @@ namespace WaPesLeague.Bot.Services
             var _mixSessionWorkflow = scope.ServiceProvider.GetRequiredService<IMixSessionWorkflow>();
             return await _mixSessionWorkflow.CleanRoomAsync(mixRequestDto.Server.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, mixRequestDto.DiscordCommandProps.RequestedByUserId);
 
+        }
+
+        private async Task<DiscordWorkflowResult> HandleRoleRegistrationAsync(MixRequestDto mixRequestDto, IServiceScope scope)
+        {
+            var _mixGroupWorkflow = scope.ServiceProvider.GetRequiredService<IMixGroupWorkflow>();
+            return await _mixGroupWorkflow.RoleRegistrationAsync(_mapper.Map<DiscordCommandPropsDto>(mixRequestDto.DiscordCommandProps), mixRequestDto.RoleId.Value, mixRequestDto.RoleName, mixRequestDto.Server.ServerId, mixRequestDto.Minutes.Value);
         }
         #endregion
 

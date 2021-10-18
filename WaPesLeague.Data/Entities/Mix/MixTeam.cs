@@ -15,6 +15,7 @@ namespace WaPesLeague.Data.Entities.Mix
         public virtual MixSession MixSession { get; set; }
         public List<MixPosition> Formation { get; set; }
         public virtual List<MixTeamTag> Tags { get; set; }
+        public virtual List<MixTeamRoleOpening> MixTeamRoleOpenings { get; set; }
 
         public bool HasNameOrTag(string codeOrTag)
         {

@@ -21,6 +21,7 @@ namespace WaPesLeague.Business.Workflows
 {
     public class MixSessionWorkflow : BaseWorkflow<MixSessionWorkflow>, IMixSessionWorkflow
     {
+        private readonly IMixGroupRoleOpeningWorkflow _mixGroupRoleOpeningWorkflow;
         private readonly IMixChannelManager _mixChannelManager;
         private readonly IMixSessionManager _mixSessionManager;
         private readonly IMixPositionManager _mixPositionManager;
@@ -30,11 +31,12 @@ namespace WaPesLeague.Business.Workflows
 
         private readonly Base.Bot.Bot _bot;
 
-        public MixSessionWorkflow(IMixChannelManager mixChannelManager,  IMixSessionManager mixSessionManager, IMixPositionManager mixPositionManager, IMixPositionReservationManager mixPositionReservationManager,
+        public MixSessionWorkflow(IMixGroupRoleOpeningWorkflow mixGroupRoleOpeningWorkflow, IMixChannelManager mixChannelManager,  IMixSessionManager mixSessionManager, IMixPositionManager mixPositionManager, IMixPositionReservationManager mixPositionReservationManager,
             IPositionManager positionManager, IMixTeamManager mixTeamManager, Base.Bot.Bot bot,
             IMemoryCache cache, IMapper mapper, ILogger<MixSessionWorkflow> logger, ErrorMessages errorMessages, GeneralMessages generalMessages)
             : base(cache, mapper, logger, errorMessages, generalMessages)
         {
+            _mixGroupRoleOpeningWorkflow = mixGroupRoleOpeningWorkflow;
             _mixChannelManager = mixChannelManager;
             _mixSessionManager = mixSessionManager;
             _mixPositionManager = mixPositionManager;
@@ -104,7 +106,7 @@ namespace WaPesLeague.Business.Workflows
 
         public async Task<DiscordWorkflowResult> SignInAsync(SignInDto dto)
         {
-            var validator = new SignInDtoValidator(_mixChannelManager, _mixSessionManager, ErrorMessages, GeneralMessages);
+            var validator = new SignInDtoValidator(_mixChannelManager, _mixSessionManager, _mixGroupRoleOpeningWorkflow, ErrorMessages, GeneralMessages);
             var validationResults = await validator.ValidateAsync(dto);
             if (validationResults.Errors.Any())
                 return HandleValidationResults(validationResults);
@@ -250,7 +252,10 @@ namespace WaPesLeague.Business.Workflows
         {
             var mixSession = await _mixSessionManager.GetActiveMixSessionByServerIdAndDiscordChannelIdAsync(serverId, discordChannelId.ToString());
             if (mixSession != null)
-                return MapMixSessionWithRelatedDataToDiscordString(mixSession, mixSession.MixChannel.MixGroup.Server.TimeZoneName);
+            {
+                var roleOpenings = (await _mixGroupRoleOpeningWorkflow.GetMixGroupRoleOpeningsFromCacheOrDbAsync()).Where(mgro => mgro.MixGroupId == mixSession.MixChannel.MixGroupId).ToList();
+                return MapMixSessionWithRelatedDataToDiscordString(mixSession, mixSession.MixChannel.MixGroup.Server.TimeZoneName, roleOpenings);
+            } 
 
             return new DiscordWorkflowResult(ErrorMessages.NoActiveSessionFoundInChannel.GetValueForLanguage(), false);
         }
@@ -709,7 +714,7 @@ namespace WaPesLeague.Business.Workflows
             return new DiscordWorkflowResult(GeneralMessages.AppliedChanges.GetValueForLanguage(), true);
         }
 
-        private DiscordWorkflowResult MapMixSessionWithRelatedDataToDiscordString(MixSession mixSession, string timeZone)
+        private DiscordWorkflowResult MapMixSessionWithRelatedDataToDiscordString(MixSession mixSession, string timeZone, List<MixGroupRoleOpening> roleOpeningsForMixGroup)
         {
             var sb = new StringBuilder();
             sb.AppendLine(Bot.BotLine);
@@ -720,8 +725,20 @@ namespace WaPesLeague.Business.Workflows
 
             var roomOwnerDiscordName = mixSession.RoomOwner?.ToGetPlatformDiscordSting(GeneralMessages);
             
-            var registrationTime = new Time(DateTimeHelper.ConvertDateTimeToApplicationTimeZone(mixSession.DateRegistrationOpening, timeZone));
+            var registrationDateTime = DateTimeHelper.ConvertDateTimeToApplicationTimeZone(mixSession.DateRegistrationOpening, timeZone);
+            var registrationTime = new Time(registrationDateTime);
             var startTime = new Time(DateTimeHelper.ConvertDateTimeToApplicationTimeZone(mixSession.DateStart, timeZone));
+            var registrationTimeString = new StringBuilder(registrationTime.ToDiscordString());
+            if (roleOpeningsForMixGroup.Any())
+            {
+                var message = new StringBuilder();
+                foreach(var roleOpeningGrouping in roleOpeningsForMixGroup.GroupBy(ro => ro.Minutes))
+                {
+                    var roles = String.Join(" & ", roleOpeningGrouping.Select(x => x.ServerRole.Name));
+                    var time = new Time(registrationDateTime.AddMinutes(roleOpeningGrouping.Key));
+                    registrationTimeString.Append($" ({string.Join(" & ", roleOpeningGrouping.Select(x => x.ServerRole.Name))} {time.ToDiscordString()}) ");
+                }
+            }
             sb.AppendLine($":writing_hand: : {registrationTime.ToDiscordString()}");
             sb.AppendLine($":stopwatch: : {startTime.ToDiscordString()}");
             sb.AppendLine();

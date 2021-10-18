@@ -739,7 +739,7 @@ namespace WaPesLeague.Business.Workflows
                     registrationTimeString.Append($" ({string.Join(" & ", roleOpeningGrouping.Select(x => x.ServerRole.Name))} {time.ToDiscordString()}) ");
                 }
             }
-            sb.AppendLine($":writing_hand: : {registrationTime.ToDiscordString()}");
+            sb.AppendLine($":writing_hand: : {registrationTimeString}");
             sb.AppendLine($":stopwatch: : {startTime.ToDiscordString()}");
             sb.AppendLine();
             var roomName = string.IsNullOrWhiteSpace(mixSession.GameRoomName)

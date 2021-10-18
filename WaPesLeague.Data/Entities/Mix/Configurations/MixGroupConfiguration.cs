@@ -21,7 +21,7 @@ namespace WaPesLeague.Data.Entities.Mix.Configurations
 
             builder.HasMany(mx => mx.MixGroupRoleOpenings)
                 .WithOne(mc => mc.MixGroup)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(mx => mx.Server)
                 .WithMany(s => s.MixGroups)

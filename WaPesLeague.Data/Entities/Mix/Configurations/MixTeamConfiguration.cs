@@ -21,7 +21,7 @@ namespace WaPesLeague.Data.Entities.Mix.Configurations
 
             builder.HasMany(mt => mt.MixTeamRoleOpenings)
                 .WithOne(mtro => mtro.MixTeam)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

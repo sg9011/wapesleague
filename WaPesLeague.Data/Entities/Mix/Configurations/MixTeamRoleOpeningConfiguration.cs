@@ -12,7 +12,8 @@ namespace WaPesLeague.Data.Entities.Mix.Configurations
 
             builder.HasOne(mx => mx.ServerRole)
                 .WithMany(s => s.MixTeamRoleOpenings)
-                .HasForeignKey(mx => mx.ServerRoleId);
+                .HasForeignKey(mx => mx.ServerRoleId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(mx => mx.MixTeam)
                 .WithMany(s => s.MixTeamRoleOpenings)

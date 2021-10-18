@@ -49,8 +49,7 @@ namespace WaPesLeague.Data.Migrations
                         name: "FK_MixGroupRoleOpenings_MixGroups_MixGroupId",
                         column: x => x.MixGroupId,
                         principalTable: "MixGroups",
-                        principalColumn: "MixGroupId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "MixGroupId");
                     table.ForeignKey(
                         name: "FK_MixGroupRoleOpenings_ServerRoles_ServerRoleId",
                         column: x => x.ServerRoleId,
@@ -77,8 +76,7 @@ namespace WaPesLeague.Data.Migrations
                         name: "FK_MixTeamRoleOpening_MixTeams_MixTeamId",
                         column: x => x.MixTeamId,
                         principalTable: "MixTeams",
-                        principalColumn: "MixTeamId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "MixTeamId");
                     table.ForeignKey(
                         name: "FK_MixTeamRoleOpening_ServerRoles_ServerRoleId",
                         column: x => x.ServerRoleId,

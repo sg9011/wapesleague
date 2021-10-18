@@ -2724,7 +2724,7 @@ namespace WaPesLeague.Data.Migrations
                     b.HasOne("WaPesLeague.Data.Entities.Mix.MixGroup", "MixGroup")
                         .WithMany("MixGroupRoleOpenings")
                         .HasForeignKey("MixGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("WaPesLeague.Data.Entities.Discord.ServerRole", "ServerRole")
@@ -2810,7 +2810,7 @@ namespace WaPesLeague.Data.Migrations
                     b.HasOne("WaPesLeague.Data.Entities.Mix.MixTeam", "MixTeam")
                         .WithMany("MixTeamRoleOpenings")
                         .HasForeignKey("MixTeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("WaPesLeague.Data.Entities.Discord.ServerRole", "ServerRole")

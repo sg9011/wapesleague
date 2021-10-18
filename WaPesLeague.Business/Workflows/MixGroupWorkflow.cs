@@ -87,8 +87,8 @@ namespace WaPesLeague.Business.Workflows
             var mixChannel = await _mixChannelManager.GetActiveMixChannelByDiscordIds(props.ServerId.ToString(), props.ChannelId.ToString());
             if (mixChannel == null)
                 return new DiscordWorkflowResult(ErrorMessages.NothingToClose.GetValueForLanguage());
-            await _mixGroupManager.DeActivateMixGroupAsync(mixChannel.MixGroupId);
-            var mixGroupDeactivated = await _mixGroupManager.DeActivateMixGroupAsync(mixChannel.MixGroupId);
+            
+            var mixGroupDeactivated = await DeActivateMixGroupAndMixGroupRoleOpeningsAsync(mixChannel.MixGroupId);
             if (!mixGroupDeactivated)
                 return new DiscordWorkflowResult(ErrorMessages.FailedToCloseMixGroup.GetValueForLanguage(), false);
 
@@ -140,7 +140,7 @@ namespace WaPesLeague.Business.Workflows
             {
                 if (mixSessionToClose.MixChannel.MixGroup.Recurring == false && mixSessionToClose.MixChannel.MixGroup.IsActive == true)
                 {
-                    await _mixGroupManager.DeActivateMixGroupAsync(mixSessionToClose.MixChannel.MixGroupId);
+                    await DeActivateMixGroupAndMixGroupRoleOpeningsAsync(mixSessionToClose.MixChannel.MixGroupId);
                 }
                 var closedInternal = await _mixSessionManager.EndCurrentSessionAsync(mixSessionToClose.MixSessionId);
                 if (closedInternal.Success)
@@ -185,8 +185,10 @@ namespace WaPesLeague.Business.Workflows
                     catch (NotFoundException ex)
                     {
                         await _mixChannelManager.DisableChannelAsync(mixSessionToClose.MixChannelId);
+
                         if (!await _mixGroupManager.HasActiveMixChannelsAsync(mixSessionToClose.MixChannel.MixGroupId))
-                            await _mixGroupManager.DeActivateMixGroupAsync(mixSessionToClose.MixChannel.MixGroupId);
+                            await DeActivateMixGroupAndMixGroupRoleOpeningsAsync(mixSessionToClose.MixChannel.MixGroupId);
+                        
                         Logger.LogError(ex, $"Channel {mixSessionToClose.MixChannel.DiscordChannelId} was not found");
                         continue;
                     }
@@ -259,7 +261,7 @@ namespace WaPesLeague.Business.Workflows
         public async Task<DiscordWorkflowResult> RoleRegistrationAsync(DiscordCommandPropsDto props, ulong discordRoleId, string roleName, int serverId, int minutes)
         {
             var serverRole = await _serverRoleWorkflow.GetOrCreateServerRoleByDiscordRoleIdAndServerAsync(discordRoleId, roleName, serverId);
-            var mixGroup = await _mixGroupManager.GetActiveMixGroupByDiscordServerAndChannelIdAsync(props.ChannelId.ToString(), props.ServerId.ToString());
+            var mixGroup = await _mixGroupManager.GetActiveMixGroupByDiscordServerAndChannelIdAsync(props.ServerId.ToString(), props.ChannelId.ToString());
             var changes = false;
 
             if (mixGroup == null)
@@ -308,6 +310,24 @@ namespace WaPesLeague.Business.Workflows
             }
 
             return new DiscordWorkflowResult(GeneralMessages.AppliedChanges.GetValueForLanguage(), true);
+        }
+
+        private async Task<bool> DeActivateMixGroupAndMixGroupRoleOpeningsAsync(int mixGroupId)
+        {
+            var result = false;
+            if (await _mixGroupManager.DeActivateMixGroupAsync(mixGroupId))
+            {
+                result = true;
+                var mixGroupRoleOpenings = await _mixGroupRoleOpeningManager.GetActiveMixGroupRoleOpenings();
+                foreach(var mixGroupRoleOpening in mixGroupRoleOpenings.Where(mgro => mgro.MixGroupId == mixGroupId))
+                {
+                    if (!await _mixGroupRoleOpeningManager.DeActivateAsync(mixGroupRoleOpening.MixGroupRoleOpeningId))
+                    {
+                        result = false;
+                    }
+                }
+            }
+            return result;
         }
     }
 }

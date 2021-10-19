@@ -46,7 +46,6 @@ namespace WaPesLeague.Data.Managers
                 .AsNoTracking()
                 .Where(mgro => mgro.IsActive == true)
                 .ToListAsync();
-
         }
     }
 }

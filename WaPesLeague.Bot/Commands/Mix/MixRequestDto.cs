@@ -22,6 +22,7 @@ namespace WaPesLeague.Bot.Commands.Mix
         public int? Minutes { get; set; }
         public List<string> RoleIdsPlayer1 { get; set; }
         public List<string> RoleIdsPlayer2 { get; set; }
+        public List<string> ActorRoleIds { get; set; }
         public DiscordCommandProperties Player1 { get; set; }
         public DiscordCommandProperties Player2 { get; set; }
         public CreateMixRoomGroupDto CreateMixRoomGroupDto { get; set; } 
@@ -32,6 +33,7 @@ namespace WaPesLeague.Bot.Commands.Mix
         {
             RoleIdsPlayer1 = new List<string>();
             RoleIdsPlayer2 = new List<string>();
+            ActorRoleIds = new List<string>();
         }
 
         public MixRequestDto(MixRequestType requestType, DiscordCommandProperties discordCommandProps, Data.Entities.Discord.Server server) : this()

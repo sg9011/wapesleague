@@ -33,7 +33,7 @@ namespace WaPesLeague.Data.Helpers
             var dateWithOffset = utcNow.Add(offset);
             if (dateWithOffset.Day != utcNow.Day)
                 dateWithOffset = dateWithOffset.AddDays(dateWithOffset.Day > utcNow.Day ? -1 : 1);
-            var dateTime = new DateTime(dateWithOffset.Year, dateWithOffset.Month, dateWithOffset.Day, time.Hour, time.Minute, 0, DateTimeKind.Utc); //Get The Actual offset on this hour. (is it 100% correct no, but it will do for now)
+            var dateTime = new DateTime(dateWithOffset.Year, dateWithOffset.Month, dateWithOffset.Day, time.Hour, time.Minute, time.Seconds, DateTimeKind.Utc); //Get The Actual offset on this hour. (is it 100% correct no, but it will do for now)
             var offsetToUse = timeZoneInfo.GetUtcOffset(dateTime);
             return dateTime.Add(-offsetToUse);
         }

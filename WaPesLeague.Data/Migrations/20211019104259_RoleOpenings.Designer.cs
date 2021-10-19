@@ -10,8 +10,8 @@ using WaPesLeague.Data;
 namespace WaPesLeague.Data.Migrations
 {
     [DbContext(typeof(WaPesDbContext))]
-    [Migration("20211018142254_MixGroupRoleOpenings")]
-    partial class MixGroupRoleOpenings
+    [Migration("20211019104259_RoleOpenings")]
+    partial class RoleOpenings
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1719,7 +1719,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("ServerRoleId");
 
-                    b.ToTable("MixTeamRoleOpening");
+                    b.ToTable("MixTeamRoleOpenings");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixTeamTag", b =>
@@ -2818,7 +2818,7 @@ namespace WaPesLeague.Data.Migrations
                     b.HasOne("WaPesLeague.Data.Entities.Discord.ServerRole", "ServerRole")
                         .WithMany("MixTeamRoleOpenings")
                         .HasForeignKey("ServerRoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("MixTeam");

@@ -20,6 +20,7 @@ namespace WaPesLeague.Data.Infrastructure
             services.AddScoped<IMixPositionManager, MixPositionManager>();
             services.AddScoped<IMixSessionManager, MixSessionManager>();
             services.AddScoped<IMixTeamManager, MixTeamManager>();
+            services.AddScoped<IMixTeamRoleOpeningManager, MixTeamRoleOpeningManager>();
             services.AddScoped<IMixUserPositionSessionStatManager, MixUserPositionSessionStatManager>();
 
             services.AddScoped<IPlatformManager, PlatformManager>();

@@ -53,6 +53,9 @@ namespace WaPesLeague.Data.Managers
                         .ThenInclude(f => f.Position)
                             .ThenInclude(p => p.PositionGroup)
                 .Include(ms => ms.MixTeams)
+                    .ThenInclude(mt => mt.MixTeamRoleOpenings.Where(mtro => mtro.End > dbNow))
+                        .ThenInclude(mtro => mtro.ServerRole)
+                .Include(ms => ms.MixTeams)
                     .ThenInclude(mt => mt.Tags)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(ms => ms.MixChannelId == mixChannelId
@@ -120,6 +123,9 @@ namespace WaPesLeague.Data.Managers
                     .ThenInclude(mt => mt.Formation.Where(f => f.DateEnd == null))
                         .ThenInclude(f => f.Position.PositionGroup)
                 .Include(ms => ms.MixTeams)
+                    .ThenInclude(mt => mt.MixTeamRoleOpenings.Where(mtro => mtro.End > dbNow))
+                        .ThenInclude(mtro => mtro.ServerRole)
+                .Include(ms => ms.MixTeams)
                     .ThenInclude(mt => mt.Formation.Where(f => f.DateEnd == null))
                         .ThenInclude(f => f.Position)
                             .ThenInclude(p => p.Tags.Where(t => t.ServerId == serverId && t.IsDisplayValue == true))
@@ -145,7 +151,6 @@ namespace WaPesLeague.Data.Managers
                     && ms.MixChannel.MixGroup.Server.IsActive == true
                     && ms.MixChannel.MixGroup.IsActive
                     && ms.MixChannel.Enabled == true
-                    //&& ms.DateRegistrationOpening < time
                     && ms.DateToClose > time &&
                     ms.DateClosed == null);
 
@@ -157,18 +162,6 @@ namespace WaPesLeague.Data.Managers
                 MixGroupId = mixSession.MixChannel.MixGroupId,
                 RegistrationTime = mixSession.DateRegistrationOpening
             };
-
-            //return await _context.MixSessions
-
-            //    .AnyAsync(ms => 
-            //        ms.MixChannel.DiscordChannelId == discordChannelId
-            //        && ms.MixChannel.MixGroup.Server.DiscordServerId == discordServerid
-            //        && ms.MixChannel.MixGroup.Server.IsActive == true
-            //        && ms.MixChannel.MixGroup.IsActive
-            //        && ms.MixChannel.Enabled == true
-            //        //&& ms.DateRegistrationOpening < time
-            //        && ms.DateToClose > time &&
-            //        ms.DateClosed == null);
         }
 
         public async Task<bool> CheckIfExtraMixSessionShouldBeCreatedAsync(int mixGroupId)

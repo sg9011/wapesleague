@@ -179,7 +179,7 @@ namespace WaPesLeague.Bot.Services
             var _mixSessionWorkflow = scope.ServiceProvider.GetRequiredService<IMixSessionWorkflow>();
             var userId = await _userWorkflow.GetOrCreateUserIdByDiscordId(_mapper.Map<DiscordCommandPropsDto>(mixRequestDto.DiscordCommandProps));
 
-            var signInDto = new SignInDto(mixRequestDto.DiscordCommandProps.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, userId, mixRequestDto.Team, mixRequestDto.Position, mixRequestDto.ExtraInfo, mixRequestDto.Server.ServerId, mixRequestDto.RoleIdsPlayer1);
+            var signInDto = new SignInDto(mixRequestDto.DiscordCommandProps.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, userId, mixRequestDto.Team, mixRequestDto.Position, mixRequestDto.ExtraInfo, mixRequestDto.Server.ServerId, mixRequestDto.RoleIdsPlayer1, mixRequestDto.ActorRoleIds);
 
             return await _mixSessionWorkflow.SignInAsync(signInDto);
         }
@@ -265,13 +265,13 @@ namespace WaPesLeague.Bot.Services
             var player1Id = await _userWorkflow.GetOrCreateUserIdByDiscordId(_mapper.Map<DiscordCommandPropsDto>(mixRequestDto.Player1));
             var player2Id = await _userWorkflow.GetOrCreateUserIdByDiscordId(_mapper.Map<DiscordCommandPropsDto>(mixRequestDto.Player2));
 
-            return await _mixSessionWorkflow.SwapAsync(mixRequestDto.Server.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, player1Id, player2Id, mixRequestDto.DiscordCommandProps.RequestedByUserId, mixRequestDto.RoleIdsPlayer1, mixRequestDto.RoleIdsPlayer2);
+            return await _mixSessionWorkflow.SwapAsync(mixRequestDto.Server.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, player1Id, player2Id, mixRequestDto.DiscordCommandProps.RequestedByUserId, mixRequestDto.RoleIdsPlayer1, mixRequestDto.RoleIdsPlayer2, mixRequestDto.ActorRoleIds);
         }
 
         private async Task<DiscordWorkflowResult> HandleOpenTeamAsync(MixRequestDto mixRequestDto, IServiceScope scope)
         {
             var _mixSessionWorkflow = scope.ServiceProvider.GetRequiredService<IMixSessionWorkflow>();
-            return await _mixSessionWorkflow.OpenTeamAsync(mixRequestDto.Server.ServerId, mixRequestDto.DiscordCommandProps.ChannelId);
+            return await _mixSessionWorkflow.OpenTeamAsync(mixRequestDto.Server.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, mixRequestDto.RoleId, mixRequestDto.RoleName, mixRequestDto.Minutes);
         }
 
         private async Task<DiscordWorkflowResult> HandleCleanMixAsync(MixRequestDto mixRequestDto, IServiceScope scope)

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WaPesLeague.Data.Migrations
 {
-    public partial class MixGroupRoleOpenings : Migration
+    public partial class RoleOpenings : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -59,7 +59,7 @@ namespace WaPesLeague.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MixTeamRoleOpening",
+                name: "MixTeamRoleOpenings",
                 columns: table => new
                 {
                     MixTeamRoleOpeningId = table.Column<int>(type: "int", nullable: false)
@@ -71,18 +71,17 @@ namespace WaPesLeague.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MixTeamRoleOpening", x => x.MixTeamRoleOpeningId);
+                    table.PrimaryKey("PK_MixTeamRoleOpenings", x => x.MixTeamRoleOpeningId);
                     table.ForeignKey(
-                        name: "FK_MixTeamRoleOpening_MixTeams_MixTeamId",
+                        name: "FK_MixTeamRoleOpenings_MixTeams_MixTeamId",
                         column: x => x.MixTeamId,
                         principalTable: "MixTeams",
                         principalColumn: "MixTeamId");
                     table.ForeignKey(
-                        name: "FK_MixTeamRoleOpening_ServerRoles_ServerRoleId",
+                        name: "FK_MixTeamRoleOpenings_ServerRoles_ServerRoleId",
                         column: x => x.ServerRoleId,
                         principalTable: "ServerRoles",
-                        principalColumn: "ServerRoleId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ServerRoleId");
                 });
 
             migrationBuilder.CreateIndex(
@@ -96,13 +95,13 @@ namespace WaPesLeague.Data.Migrations
                 column: "ServerRoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MixTeamRoleOpening_MixTeamId",
-                table: "MixTeamRoleOpening",
+                name: "IX_MixTeamRoleOpenings_MixTeamId",
+                table: "MixTeamRoleOpenings",
                 column: "MixTeamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MixTeamRoleOpening_ServerRoleId",
-                table: "MixTeamRoleOpening",
+                name: "IX_MixTeamRoleOpenings_ServerRoleId",
+                table: "MixTeamRoleOpenings",
                 column: "ServerRoleId");
 
             migrationBuilder.CreateIndex(
@@ -122,7 +121,7 @@ namespace WaPesLeague.Data.Migrations
                 name: "MixGroupRoleOpenings");
 
             migrationBuilder.DropTable(
-                name: "MixTeamRoleOpening");
+                name: "MixTeamRoleOpenings");
 
             migrationBuilder.DropTable(
                 name: "ServerRoles");

@@ -22,30 +22,33 @@ namespace WaPesLeague.Business.Workflows
     public class MixSessionWorkflow : BaseWorkflow<MixSessionWorkflow>, IMixSessionWorkflow
     {
         private readonly IMixGroupRoleOpeningWorkflow _mixGroupRoleOpeningWorkflow;
-        //private readonly IMixSessionWorkflow _mixSessionWorkflow;
+        private readonly IServerRoleWorkflow _serverRoleWorkflow;
         private readonly IMixChannelManager _mixChannelManager;
         private readonly IMixSessionManager _mixSessionManager;
         private readonly IMixPositionManager _mixPositionManager;
         private readonly IMixPositionReservationManager _mixPositionReservationManager;
         private readonly IPositionManager _positionManager;
         private readonly IMixTeamManager _mixTeamManager;
+        private readonly IMixTeamRoleOpeningManager _mixTeamRoleOpeningManager;
+        
 
         private readonly Base.Bot.Bot _bot;
 
-        public MixSessionWorkflow(IMixGroupRoleOpeningWorkflow mixGroupRoleOpeningWorkflow, //IMixSessionWorkflow mixSessionWorkflow,
+        public MixSessionWorkflow(IMixGroupRoleOpeningWorkflow mixGroupRoleOpeningWorkflow, IServerRoleWorkflow serverRoleWorkflow,
             IMixChannelManager mixChannelManager,  IMixSessionManager mixSessionManager, IMixPositionManager mixPositionManager, IMixPositionReservationManager mixPositionReservationManager,
-            IPositionManager positionManager, IMixTeamManager mixTeamManager, Base.Bot.Bot bot,
+            IPositionManager positionManager, IMixTeamManager mixTeamManager, IMixTeamRoleOpeningManager mixTeamRoleOpeningManager, Base.Bot.Bot bot,
             IMemoryCache cache, IMapper mapper, ILogger<MixSessionWorkflow> logger, ErrorMessages errorMessages, GeneralMessages generalMessages)
             : base(cache, mapper, logger, errorMessages, generalMessages)
         {
             _mixGroupRoleOpeningWorkflow = mixGroupRoleOpeningWorkflow;
-            //_mixSessionWorkflow = mixSessionWorkflow;
+            _serverRoleWorkflow = serverRoleWorkflow;
             _mixChannelManager = mixChannelManager;
             _mixSessionManager = mixSessionManager;
             _mixPositionManager = mixPositionManager;
             _mixPositionReservationManager = mixPositionReservationManager;
             _positionManager = positionManager;
             _mixTeamManager = mixTeamManager;
+            _mixTeamRoleOpeningManager = mixTeamRoleOpeningManager;
 
             _bot = bot;
         }   
@@ -122,6 +125,10 @@ namespace WaPesLeague.Business.Workflows
             var teamToSignInFor = mixSession.MixTeams.SingleOrDefault(mt => mt.HasNameOrTag(dto.Team));
             if (teamToSignInFor == null)
                 return new DiscordWorkflowResult($"{ErrorMessages.NoTeamFound.GetValueForLanguage()}: {dto.Team}", false);
+
+            var teamToSignInForRoleOpening = teamToSignInFor.MixTeamRoleOpenings.FirstOrDefault();
+            if (teamToSignInForRoleOpening != null && !dto.ActorRoleIds.Contains(teamToSignInForRoleOpening.ServerRole.DiscordRoleId, StringComparer.InvariantCultureIgnoreCase))
+                return new DiscordWorkflowResult(ErrorMessages.RegistrationWithinValidHours.GetValueForLanguage(), false);
 
             MixPosition userPosition = null;
             var mixtTeamPositions = await _mixPositionManager.GetAvailablePositionsForTeamAsync(teamToSignInFor.MixTeamId);
@@ -256,8 +263,12 @@ namespace WaPesLeague.Business.Workflows
             var mixSession = await _mixSessionManager.GetActiveMixSessionByServerIdAndDiscordChannelIdAsync(serverId, discordChannelId.ToString());
             if (mixSession != null)
             {
-                var roleOpenings = (await _mixGroupRoleOpeningWorkflow.GetMixGroupRoleOpeningsFromCacheOrDbAsync()).Where(mgro => mgro.MixGroupId == mixSession.MixChannel.MixGroupId).ToList();
-                return MapMixSessionWithRelatedDataToDiscordString(mixSession, mixSession.MixChannel.MixGroup.Server.TimeZoneName, roleOpenings);
+                
+                var mixGroupRoleOpenings = (await _mixGroupRoleOpeningWorkflow.GetMixGroupRoleOpeningsFromCacheOrDbAsync()).Where(mgro => mgro.MixGroupId == mixSession.MixChannel.MixGroupId).ToList();
+                //var dbNow = DateTimeHelper.GetDatabaseNow();
+                //var mixTeamIds = mixSession.MixTeams.Select(mt => mt.MixTeamId).ToList();
+                //var mixTeamRoleOpenings = (await _mixTeamRoleOpeningWorkflow.GetMixTeamRoleOpeningsFromCacheOrDbAsync()).Where(mtro => mixTeamIds.Contains(mtro.MixTeamId) && dbNow < mtro.End).ToList();
+                return MapMixSessionWithRelatedDataToDiscordString(mixSession, mixSession.MixChannel.MixGroup.Server.TimeZoneName, mixGroupRoleOpenings);
             } 
 
             return new DiscordWorkflowResult(ErrorMessages.NoActiveSessionFoundInChannel.GetValueForLanguage(), false);
@@ -509,7 +520,7 @@ namespace WaPesLeague.Business.Workflows
 
             return new DiscordWorkflowResult(GeneralMessages.AppliedChanges.GetValueForLanguage(), true);
         }
-        public async Task<DiscordWorkflowResult> SwapAsync(int serverId, ulong discordChannelId, int user1Id, int user2Id, ulong requestedBy, List<string> roleIdsPlayer1, List<string> roleIdsPlayer2)
+        public async Task<DiscordWorkflowResult> SwapAsync(int serverId, ulong discordChannelId, int user1Id, int user2Id, ulong requestedBy, List<string> roleIdsPlayer1, List<string> roleIdsPlayer2, List<string> actorRoleIds)
         {
             var notifyRequests = new List<NotifyRequest>();
             var activeMixSession = await _mixSessionManager.GetActiveMixSessionByServerIdAndDiscordChannelIdAsync(serverId, discordChannelId.ToString());
@@ -539,6 +550,10 @@ namespace WaPesLeague.Business.Workflows
                     : roleIdsPlayer2;
 
                 if (!await ValidateWithinValidHours(activeMixSession.MixChannel.MixGroup.Server.DiscordServerId, discordChannelId.ToString(), rolesToCheck))
+                    return new DiscordWorkflowResult(ErrorMessages.RegistrationWithinValidHours.GetValueForLanguage(), false);
+
+                var mixTeamRoleOpeningOfPlayerToSignOut = reservationToSignOut.MixPosition.MixTeam.MixTeamRoleOpenings.FirstOrDefault();
+                if (mixTeamRoleOpeningOfPlayerToSignOut != null && !actorRoleIds.Contains(mixTeamRoleOpeningOfPlayerToSignOut.ServerRole.DiscordRoleId, StringComparer.InvariantCultureIgnoreCase))
                     return new DiscordWorkflowResult(ErrorMessages.RegistrationWithinValidHours.GetValueForLanguage(), false);
 
                 var userIdToSignIn = player1Reservation == null
@@ -576,6 +591,18 @@ namespace WaPesLeague.Business.Workflows
             if (player1Reservation != null && player2Reservation != null)
             {
                 var dbNow = DateTimeHelper.GetDatabaseNow();
+
+                if (player1Reservation.MixPosition.MixTeamId != player2Reservation.MixPosition.MixTeamId)
+                {
+                    var currentPlayer1TeamRoleOpening = player1Reservation.MixPosition.MixTeam.MixTeamRoleOpenings.FirstOrDefault();
+                    var currentPlayer2TeamRoleOpening = player2Reservation.MixPosition.MixTeam.MixTeamRoleOpenings.FirstOrDefault();
+                    if ((currentPlayer1TeamRoleOpening != null && !actorRoleIds.Contains(currentPlayer1TeamRoleOpening.ServerRole.DiscordRoleId, StringComparer.InvariantCultureIgnoreCase))
+                        || currentPlayer2TeamRoleOpening != null && !actorRoleIds.Contains(currentPlayer2TeamRoleOpening.ServerRole.DiscordRoleId, StringComparer.InvariantCultureIgnoreCase))
+                    {
+                        return new DiscordWorkflowResult(ErrorMessages.RegistrationWithinValidHours.GetValueForLanguage(), false);
+                    }
+                }
+
                 await HandleSignOutAsync(player1Reservation, activeMixSession, dbNow, false);
                 await HandleSignOutAsync(player2Reservation, activeMixSession, dbNow, false);
 
@@ -708,7 +735,7 @@ namespace WaPesLeague.Business.Workflows
             }
         }
 
-        public async Task<DiscordWorkflowResult> OpenTeamAsync(int serverId, ulong discordChannelId)
+        public async Task<DiscordWorkflowResult> OpenTeamAsync(int serverId, ulong discordChannelId, ulong? discordRoleId, string roleName, int? minutes)
         {
             var activeMixSession = await _mixSessionManager.GetActiveMixSessionByServerIdAndDiscordChannelIdAsync(serverId, discordChannelId.ToString());
             if (activeMixSession == null)
@@ -738,6 +765,19 @@ namespace WaPesLeague.Business.Workflows
             }
             await _mixPositionManager.AddMultipleAsync(positionsToUpdate);
 
+            if (discordRoleId != null && minutes > 0 && !string.IsNullOrWhiteSpace(roleName))
+            {
+                var serverRole = await _serverRoleWorkflow.GetOrCreateServerRoleByDiscordRoleIdAndServerAsync(discordRoleId.Value, roleName, serverId);
+                var mixTeamRoleOpening = new MixTeamRoleOpening()
+                {
+                    ServerRoleId = serverRole.ServerRoleId,
+                    MixTeamId = closedMixTeam.MixTeamId,
+                    Start = dbNow,
+                    End = dbNow.AddMinutes(minutes.Value)
+                };
+                await _mixTeamRoleOpeningManager.AddAsync(mixTeamRoleOpening);
+            }
+
             return new DiscordWorkflowResult(GeneralMessages.AppliedChanges.GetValueForLanguage(), true);
         }
 
@@ -761,7 +801,7 @@ namespace WaPesLeague.Business.Workflows
                 var message = new StringBuilder();
                 foreach(var roleOpeningGrouping in roleOpeningsForMixGroup.GroupBy(ro => ro.Minutes))
                 {
-                    var roles = String.Join(" & ", roleOpeningGrouping.Select(x => x.ServerRole.Name));
+                    var roles = string.Join(" & ", roleOpeningGrouping.Select(x => x.ServerRole.Name));
                     var time = new Time(registrationDateTime.AddMinutes(roleOpeningGrouping.Key));
                     registrationTimeString.Append($" ({string.Join(" & ", roleOpeningGrouping.Select(x => x.ServerRole.Name))} {time.ToDiscordString()}) ");
                 }
@@ -809,7 +849,15 @@ namespace WaPesLeague.Business.Workflows
                 var tagsString = mixTeam.Tags.Any() && !mixTeam.PositionsLocked
                     ? $" - {GeneralMessages.Aliases.GetValueForLanguage()}: {string.Join(", ", mixTeam.Tags.Select(t => t.Tag).OrderBy(t => t))}"
                     : "";
-                sb.AppendLine(string.Format(Bot.TeamLine, $"**{mixTeam.Name}**{tagsString}"));
+
+                var mixTreamRoleOpeningString = string.Empty;
+                var mixTeamRoleOpening = mixTeam.MixTeamRoleOpenings.FirstOrDefault();
+                if (mixTeamRoleOpening != null)
+                {
+                    var time = new Time(DateTimeHelper.ConvertDateTimeToApplicationTimeZone(mixTeamRoleOpening.End, timeZone));
+                    mixTreamRoleOpeningString =$" **{string.Format(GeneralMessages.OnlyRoleCanSignInUntil.GetValueForLanguage(), mixTeamRoleOpening.ServerRole.Name, time.ToDiscordStringWithSeconds())}**";
+                }
+                sb.AppendLine(string.Format(Bot.TeamLine, $"**{mixTeam.Name}**{tagsString}{mixTreamRoleOpeningString}"));
                 sb.AppendLine();
                 if (mixTeam.PositionsLocked)
                 {

@@ -1717,7 +1717,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("ServerRoleId");
 
-                    b.ToTable("MixTeamRoleOpening");
+                    b.ToTable("MixTeamRoleOpenings");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixTeamTag", b =>
@@ -2816,7 +2816,7 @@ namespace WaPesLeague.Data.Migrations
                     b.HasOne("WaPesLeague.Data.Entities.Discord.ServerRole", "ServerRole")
                         .WithMany("MixTeamRoleOpenings")
                         .HasForeignKey("ServerRoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("MixTeam");

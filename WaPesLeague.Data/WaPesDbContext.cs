@@ -53,6 +53,7 @@ namespace WaPesLeague.Data
         public DbSet<MixSession> MixSessions { get; set; }
         public DbSet<MixTeam> MixTeams { get; set; }
         public DbSet<MixTeamTag> MixTeamTags { get; set; }
+        public DbSet<MixTeamRoleOpening> MixTeamRoleOpenings { get; set; }
         public DbSet<MixPosition> MixPositions { get; set; }
         public DbSet<MixPositionReservation> MixPositionReservations { get; set; }
         public DbSet<MixUserPositionSessionStat> MixUserPositionSessionStats { get; set; }
@@ -83,6 +84,7 @@ namespace WaPesLeague.Data
 
             #region mix
             modelBuilder.ApplyConfiguration(new MixGroupConfiguration());
+            modelBuilder.ApplyConfiguration(new MixGroupRoleOpeningConfiguration());
 
             modelBuilder.ApplyConfiguration(new MixChannelConfiguration());
             modelBuilder.ApplyConfiguration(new MixChannelTeamConfiguration());
@@ -92,6 +94,7 @@ namespace WaPesLeague.Data
             modelBuilder.ApplyConfiguration(new MixSessionConfiguration());
             modelBuilder.ApplyConfiguration(new MixTeamConfiguration());
             modelBuilder.ApplyConfiguration(new MixTeamTagConfiguration());
+            modelBuilder.ApplyConfiguration(new MixTeamRoleOpeningConfiguration());
 
             modelBuilder.ApplyConfiguration(new MixPositionConfiguration());
             modelBuilder.ApplyConfiguration(new MixPositionReservationConfiguration());

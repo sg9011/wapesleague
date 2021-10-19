@@ -1,12 +1,9 @@
 ﻿using FluentValidation;
-using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WaPesLeague.Business.Workflows.Interfaces;
 using WaPesLeague.Constants;
 using WaPesLeague.Constants.Resources;
-using WaPesLeague.Data.Helpers;
 using WaPesLeague.Data.Managers.Interfaces;
 
 namespace WaPesLeague.Business.Dto.Mix
@@ -16,18 +13,20 @@ namespace WaPesLeague.Business.Dto.Mix
         private readonly IMixChannelManager _mixChannelManager;
         private readonly IMixSessionManager _mixSessionManager;
         private readonly IMixGroupRoleOpeningWorkflow _mixGroupRoleOpeningWorkflow;
+        private readonly IMixSessionWorkflow _mixSessionWorkflow;
         private readonly ErrorMessages ErrorMessages;
         private readonly GeneralMessages GeneralMessages;
 
         private bool hasChannel { get; set; }
         private bool userNotAlreadyActiveInOtherMixChannel { get; set; }
 
-        public SignInDtoValidator(IMixChannelManager mixChannelManager, IMixSessionManager mixSessionManager, IMixGroupRoleOpeningWorkflow mixGroupRoleOpeningWorkflow, ErrorMessages errorMessages, GeneralMessages generalMessages)
+        public SignInDtoValidator(IMixChannelManager mixChannelManager, IMixSessionManager mixSessionManager, IMixGroupRoleOpeningWorkflow mixGroupRoleOpeningWorkflow, IMixSessionWorkflow mixSessionWorkflow, ErrorMessages errorMessages, GeneralMessages generalMessages)
         {
             CascadeMode = CascadeMode.Stop;
             _mixChannelManager = mixChannelManager;
             _mixSessionManager = mixSessionManager;
             _mixGroupRoleOpeningWorkflow = mixGroupRoleOpeningWorkflow;
+            _mixSessionWorkflow = mixSessionWorkflow;
             ErrorMessages = errorMessages;
             GeneralMessages = generalMessages;
             
@@ -68,18 +67,7 @@ namespace WaPesLeague.Business.Dto.Mix
             if (!userNotAlreadyActiveInOtherMixChannel)
                 return true;
 
-            var time = DateTimeHelper.GetDatabaseNow();
-
-            var mixGroupRegistrationOpening = await _mixSessionManager.HasOpenMixSessionByDiscordIds(dto.DiscordServerId.ToString(), dto.DiscordChannelId.ToString(), time);
-            if (mixGroupRegistrationOpening == null)
-                return false;
-
-            var filteredMixGroupRoleOpenings = (await _mixGroupRoleOpeningWorkflow.GetMixGroupRoleOpeningsFromCacheOrDbAsync())
-                ?.Where(m => m.MixGroupId == mixGroupRegistrationOpening.MixGroupId && dto.RoleIds.Contains(m.ServerRole.DiscordRoleId, StringComparer.InvariantCultureIgnoreCase));
-
-            return filteredMixGroupRoleOpenings?.Any() ?? false
-                ? filteredMixGroupRoleOpenings.All(op => mixGroupRegistrationOpening.RegistrationTime.AddMinutes(op.Minutes) < time)
-                : mixGroupRegistrationOpening.RegistrationTime < time;
+            return await _mixSessionWorkflow.ValidateWithinValidHours(dto.DiscordServerId.ToString(), dto.DiscordChannelId.ToString(), dto.RoleIds);
         }
     }
 }

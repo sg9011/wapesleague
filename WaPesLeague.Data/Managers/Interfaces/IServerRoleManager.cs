@@ -5,7 +5,7 @@ namespace WaPesLeague.Data.Managers.Interfaces
 {
     public interface IServerRoleManager
     {
-        public Task<ServerRole> GetServerRoleByDiscordRoleIdAndServerIdAsync(string discordRoleId, string discordServerId);
+        public Task<ServerRole> GetServerRoleByDiscordRoleIdAndServerIdAsync(string discordRoleId, int serverId);
         public Task<ServerRole> AddAsync(ServerRole serverRole);
         public Task<ServerRole> UpdateAsync(ServerRole serverRole);
     }

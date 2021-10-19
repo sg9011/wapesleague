@@ -22,6 +22,7 @@ namespace WaPesLeague.Business.Workflows
     public class MixSessionWorkflow : BaseWorkflow<MixSessionWorkflow>, IMixSessionWorkflow
     {
         private readonly IMixGroupRoleOpeningWorkflow _mixGroupRoleOpeningWorkflow;
+        //private readonly IMixSessionWorkflow _mixSessionWorkflow;
         private readonly IMixChannelManager _mixChannelManager;
         private readonly IMixSessionManager _mixSessionManager;
         private readonly IMixPositionManager _mixPositionManager;
@@ -31,12 +32,14 @@ namespace WaPesLeague.Business.Workflows
 
         private readonly Base.Bot.Bot _bot;
 
-        public MixSessionWorkflow(IMixGroupRoleOpeningWorkflow mixGroupRoleOpeningWorkflow, IMixChannelManager mixChannelManager,  IMixSessionManager mixSessionManager, IMixPositionManager mixPositionManager, IMixPositionReservationManager mixPositionReservationManager,
+        public MixSessionWorkflow(IMixGroupRoleOpeningWorkflow mixGroupRoleOpeningWorkflow, //IMixSessionWorkflow mixSessionWorkflow,
+            IMixChannelManager mixChannelManager,  IMixSessionManager mixSessionManager, IMixPositionManager mixPositionManager, IMixPositionReservationManager mixPositionReservationManager,
             IPositionManager positionManager, IMixTeamManager mixTeamManager, Base.Bot.Bot bot,
             IMemoryCache cache, IMapper mapper, ILogger<MixSessionWorkflow> logger, ErrorMessages errorMessages, GeneralMessages generalMessages)
             : base(cache, mapper, logger, errorMessages, generalMessages)
         {
             _mixGroupRoleOpeningWorkflow = mixGroupRoleOpeningWorkflow;
+            //_mixSessionWorkflow = mixSessionWorkflow;
             _mixChannelManager = mixChannelManager;
             _mixSessionManager = mixSessionManager;
             _mixPositionManager = mixPositionManager;
@@ -106,7 +109,7 @@ namespace WaPesLeague.Business.Workflows
 
         public async Task<DiscordWorkflowResult> SignInAsync(SignInDto dto)
         {
-            var validator = new SignInDtoValidator(_mixChannelManager, _mixSessionManager, _mixGroupRoleOpeningWorkflow, ErrorMessages, GeneralMessages);
+            var validator = new SignInDtoValidator(_mixChannelManager, _mixSessionManager, _mixGroupRoleOpeningWorkflow, this, ErrorMessages, GeneralMessages);
             var validationResults = await validator.ValidateAsync(dto);
             if (validationResults.Errors.Any())
                 return HandleValidationResults(validationResults);
@@ -506,7 +509,7 @@ namespace WaPesLeague.Business.Workflows
 
             return new DiscordWorkflowResult(GeneralMessages.AppliedChanges.GetValueForLanguage(), true);
         }
-        public async Task<DiscordWorkflowResult> SwapAsync(int serverId, ulong discordChannelId, int user1Id, int user2Id, ulong requestedBy)
+        public async Task<DiscordWorkflowResult> SwapAsync(int serverId, ulong discordChannelId, int user1Id, int user2Id, ulong requestedBy, List<string> roleIdsPlayer1, List<string> roleIdsPlayer2)
         {
             var notifyRequests = new List<NotifyRequest>();
             var activeMixSession = await _mixSessionManager.GetActiveMixSessionByServerIdAndDiscordChannelIdAsync(serverId, discordChannelId.ToString());
@@ -528,7 +531,16 @@ namespace WaPesLeague.Business.Workflows
 
             if (player1Reservation == null || player2Reservation == null)
             {
+                
+                //validate roles of player without reservation
                 var reservationToSignOut = player1Reservation ?? player2Reservation;
+                var rolesToCheck = player1Reservation == null
+                    ? roleIdsPlayer1
+                    : roleIdsPlayer2;
+
+                if (!await ValidateWithinValidHours(activeMixSession.MixChannel.MixGroup.Server.DiscordServerId, discordChannelId.ToString(), rolesToCheck))
+                    return new DiscordWorkflowResult(ErrorMessages.RegistrationWithinValidHours.GetValueForLanguage(), false);
+
                 var userIdToSignIn = player1Reservation == null
                     ? user1Id
                     : user2Id;
@@ -610,6 +622,21 @@ namespace WaPesLeague.Business.Workflows
             return new DiscordWorkflowResult(GeneralMessages.AppliedChanges.GetValueForLanguage(), true);
         }
 
+        public async Task<bool> ValidateWithinValidHours(string discordServerId, string discordChannelId, List<string> roleIds)
+        {
+            var time = DateTimeHelper.GetDatabaseNow();
+
+            var mixGroupRegistrationOpening = await _mixSessionManager.HasOpenMixSessionByDiscordIds(discordServerId, discordChannelId, time);
+            if (mixGroupRegistrationOpening == null)
+                return false;
+
+            var filteredMixGroupRoleOpenings = (await _mixGroupRoleOpeningWorkflow.GetMixGroupRoleOpeningsFromCacheOrDbAsync())
+                ?.Where(m => m.MixGroupId == mixGroupRegistrationOpening.MixGroupId && roleIds.Contains(m.ServerRole.DiscordRoleId, StringComparer.InvariantCultureIgnoreCase));
+
+            return filteredMixGroupRoleOpenings?.Any() ?? false
+                ? filteredMixGroupRoleOpenings.All(op => mixGroupRegistrationOpening.RegistrationTime.AddMinutes(op.Minutes) < time)
+                : mixGroupRegistrationOpening.RegistrationTime < time;
+        }
         public async Task HandleNotificationsOfMixSessionsAsync()
         {
             var rangeStartTime = DateTimeHelper.GetDatabaseNow().AddMinutes(5);

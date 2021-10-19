@@ -265,7 +265,7 @@ namespace WaPesLeague.Bot.Services
             var player1Id = await _userWorkflow.GetOrCreateUserIdByDiscordId(_mapper.Map<DiscordCommandPropsDto>(mixRequestDto.Player1));
             var player2Id = await _userWorkflow.GetOrCreateUserIdByDiscordId(_mapper.Map<DiscordCommandPropsDto>(mixRequestDto.Player2));
 
-            return await _mixSessionWorkflow.SwapAsync(mixRequestDto.Server.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, player1Id, player2Id, mixRequestDto.DiscordCommandProps.RequestedByUserId);
+            return await _mixSessionWorkflow.SwapAsync(mixRequestDto.Server.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, player1Id, player2Id, mixRequestDto.DiscordCommandProps.RequestedByUserId, mixRequestDto.RoleIdsPlayer1, mixRequestDto.RoleIdsPlayer2);
         }
 
         private async Task<DiscordWorkflowResult> HandleOpenTeamAsync(MixRequestDto mixRequestDto, IServiceScope scope)

@@ -21,11 +21,11 @@ namespace WaPesLeague.Data.Managers
             return serverRole;
         }
 
-        public async Task<ServerRole> GetServerRoleByDiscordRoleIdAndServerIdAsync(string discordRoleId, string discordServerId)
+        public async Task<ServerRole> GetServerRoleByDiscordRoleIdAndServerIdAsync(string discordRoleId, int serverId)
         {
             return await _context.ServerRoles
                 .AsNoTracking()
-                .FirstOrDefaultAsync(sr => sr.DiscordRoleId == discordRoleId && sr.Server.DiscordServerId == discordServerId);
+                .FirstOrDefaultAsync(sr => sr.DiscordRoleId == discordRoleId && sr.ServerId == serverId);
 
         }
 

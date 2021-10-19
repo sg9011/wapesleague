@@ -44,7 +44,7 @@ namespace WaPesLeague.Business.Workflows
         {
             if (!MemoryCache.TryGetValue(Cache.GetServerRoleByDiscordRoleIdAndServerId(discordRoleId, serverId).ToUpperInvariant(), out ServerRole cacheEntry))
             {
-                var serverRole = await _serverRoleManager.GetServerRoleByDiscordRoleIdAndServerIdAsync(discordRoleId.ToString(), serverId.ToString());
+                var serverRole = await _serverRoleManager.GetServerRoleByDiscordRoleIdAndServerIdAsync(discordRoleId.ToString(), serverId);
                 if (serverRole != null)
                 {
                     if (ServerRoleChanged(serverRole, roleName))

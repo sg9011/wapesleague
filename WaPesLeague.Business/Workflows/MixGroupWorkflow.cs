@@ -15,6 +15,7 @@ using WaPesLeague.Business.Workflows.Interfaces;
 using WaPesLeague.Constants;
 using WaPesLeague.Constants.Resources;
 using WaPesLeague.Data.Entities.Mix;
+using WaPesLeague.Data.Helpers;
 using WaPesLeague.Data.Managers.Interfaces;
 using Bot = Base.Bot.Bot;
 
@@ -25,8 +26,10 @@ namespace WaPesLeague.Business.Workflows
         private readonly IMixChannelManager _mixChannelManager;
         private readonly IServerFormationManager _serverFormationManager;
         private readonly IMixGroupManager _mixGroupManager;
+        private readonly IMixGroupRoleOpeningManager _mixGroupRoleOpeningManager;
         private readonly IMixChannelWorkflow _mixChannelWorkflow;
         private readonly IMixSessionWorkflow _mixSessionWorkflow;
+        private readonly IServerRoleWorkflow _serverRoleWorkflow;
         private readonly IServerWorkflow _serverWorkflow;
         private readonly IMixSessionManager _mixSessionManager;
         private readonly IUserMemberManager _userMemberManager;
@@ -34,8 +37,8 @@ namespace WaPesLeague.Business.Workflows
 
         private readonly Bot _bot;
 
-        public MixGroupWorkflow(IMixChannelManager mixChannelManager, IServerFormationManager serverFormationManager, IMixGroupManager mixGroupManager,
-            IMixChannelWorkflow mixChannelWorkflow, IMixSessionWorkflow mixSessionWorkflow, IServerWorkflow serverWorkflow, IMixSessionManager mixSessionManager, Bot bot,
+        public MixGroupWorkflow(IMixChannelManager mixChannelManager, IServerFormationManager serverFormationManager, IMixGroupManager mixGroupManager, IMixGroupRoleOpeningManager mixGroupRoleOpeningManager,
+            IMixChannelWorkflow mixChannelWorkflow, IMixSessionWorkflow mixSessionWorkflow, IServerWorkflow serverWorkflow, IServerRoleWorkflow serverRoleWorkflow, IMixSessionManager mixSessionManager, Bot bot,
             IUserMemberManager userMemberManager, IServerManager serverManager,
             IMemoryCache cache, IMapper mapper, ILogger<MixGroupWorkflow> logger, ErrorMessages errorMessages, GeneralMessages generalMessages)
             : base (cache, mapper, logger, errorMessages, generalMessages)
@@ -43,8 +46,10 @@ namespace WaPesLeague.Business.Workflows
             _mixChannelManager = mixChannelManager;
             _serverFormationManager = serverFormationManager;
             _mixGroupManager = mixGroupManager;
+            _mixGroupRoleOpeningManager = mixGroupRoleOpeningManager;
             _mixChannelWorkflow = mixChannelWorkflow;
             _mixSessionWorkflow = mixSessionWorkflow;
+            _serverRoleWorkflow = serverRoleWorkflow;
             _serverWorkflow = serverWorkflow;
             _mixSessionManager = mixSessionManager;
             _userMemberManager = userMemberManager;
@@ -82,8 +87,8 @@ namespace WaPesLeague.Business.Workflows
             var mixChannel = await _mixChannelManager.GetActiveMixChannelByDiscordIds(props.ServerId.ToString(), props.ChannelId.ToString());
             if (mixChannel == null)
                 return new DiscordWorkflowResult(ErrorMessages.NothingToClose.GetValueForLanguage());
-            await _mixGroupManager.DeActivateMixGroupAsync(mixChannel.MixGroupId);
-            var mixGroupDeactivated = await _mixGroupManager.DeActivateMixGroupAsync(mixChannel.MixGroupId);
+            
+            var mixGroupDeactivated = await DeActivateMixGroupAndMixGroupRoleOpeningsAsync(mixChannel.MixGroupId);
             if (!mixGroupDeactivated)
                 return new DiscordWorkflowResult(ErrorMessages.FailedToCloseMixGroup.GetValueForLanguage(), false);
 
@@ -135,7 +140,7 @@ namespace WaPesLeague.Business.Workflows
             {
                 if (mixSessionToClose.MixChannel.MixGroup.Recurring == false && mixSessionToClose.MixChannel.MixGroup.IsActive == true)
                 {
-                    await _mixGroupManager.DeActivateMixGroupAsync(mixSessionToClose.MixChannel.MixGroupId);
+                    await DeActivateMixGroupAndMixGroupRoleOpeningsAsync(mixSessionToClose.MixChannel.MixGroupId);
                 }
                 var closedInternal = await _mixSessionManager.EndCurrentSessionAsync(mixSessionToClose.MixSessionId);
                 if (closedInternal.Success)
@@ -180,8 +185,10 @@ namespace WaPesLeague.Business.Workflows
                     catch (NotFoundException ex)
                     {
                         await _mixChannelManager.DisableChannelAsync(mixSessionToClose.MixChannelId);
+
                         if (!await _mixGroupManager.HasActiveMixChannelsAsync(mixSessionToClose.MixChannel.MixGroupId))
-                            await _mixGroupManager.DeActivateMixGroupAsync(mixSessionToClose.MixChannel.MixGroupId);
+                            await DeActivateMixGroupAndMixGroupRoleOpeningsAsync(mixSessionToClose.MixChannel.MixGroupId);
+                        
                         Logger.LogError(ex, $"Channel {mixSessionToClose.MixChannel.DiscordChannelId} was not found");
                         continue;
                     }
@@ -249,6 +256,78 @@ namespace WaPesLeague.Business.Workflows
                     }
                 }
             }
+        }
+
+        public async Task<DiscordWorkflowResult> RoleRegistrationAsync(DiscordCommandPropsDto props, ulong discordRoleId, string roleName, int serverId, int minutes)
+        {
+            var serverRole = await _serverRoleWorkflow.GetOrCreateServerRoleByDiscordRoleIdAndServerAsync(discordRoleId, roleName, serverId);
+            var mixGroup = await _mixGroupManager.GetActiveMixGroupByDiscordServerAndChannelIdAsync(props.ServerId.ToString(), props.ChannelId.ToString());
+            var changes = false;
+
+            if (mixGroup == null)
+                return new DiscordWorkflowResult(ErrorMessages.NoMixGroupFoundForSession.GetValueForLanguage(), false);
+
+            var currentRoleOpening = mixGroup.MixGroupRoleOpenings.FirstOrDefault(mgro => mgro.ServerRoleId == serverRole.ServerRoleId);
+            if (currentRoleOpening != null)
+            {
+                if (minutes == 0)
+                {
+                    changes = true;
+                    await _mixGroupRoleOpeningManager.DeActivateAsync(currentRoleOpening.MixGroupRoleOpeningId);
+                }
+                else if (minutes != currentRoleOpening.Minutes)
+                {
+                    changes = true;
+                    await _mixGroupRoleOpeningManager.DeActivateAsync(currentRoleOpening.MixGroupRoleOpeningId);
+                    var mixGroupRoleOpening = new MixGroupRoleOpening()
+                    {
+                        ServerRoleId = serverRole.ServerRoleId,
+                        MixGroupId = mixGroup.MixGroupId,
+                        IsActive = true,
+                        Minutes = minutes,
+                        DateCreated = DateTimeHelper.GetDatabaseNow()
+                    };
+                    await _mixGroupRoleOpeningManager.AddAsync(mixGroupRoleOpening);
+                }
+            }
+            else if (minutes != 0)
+            {
+                changes = true;
+                var mixGroupRoleOpening = new MixGroupRoleOpening()
+                {
+                    ServerRoleId = serverRole.ServerRoleId,
+                    MixGroupId = mixGroup.MixGroupId,
+                    IsActive = true,
+                    Minutes = minutes,
+                    DateCreated = DateTimeHelper.GetDatabaseNow()
+                };
+                await _mixGroupRoleOpeningManager.AddAsync(mixGroupRoleOpening);
+            }
+
+            if (changes)
+            {
+                MemoryCache.Set(Cache.ActiveMixGroupsRoleOpenings.ToUpperInvariant(), await _mixGroupRoleOpeningManager.GetActiveMixGroupRoleOpenings(), TimeSpan.FromHours(121));
+            }
+
+            return new DiscordWorkflowResult(GeneralMessages.AppliedChanges.GetValueForLanguage(), true);
+        }
+
+        private async Task<bool> DeActivateMixGroupAndMixGroupRoleOpeningsAsync(int mixGroupId)
+        {
+            var result = false;
+            if (await _mixGroupManager.DeActivateMixGroupAsync(mixGroupId))
+            {
+                result = true;
+                var mixGroupRoleOpenings = await _mixGroupRoleOpeningManager.GetActiveMixGroupRoleOpenings();
+                foreach(var mixGroupRoleOpening in mixGroupRoleOpenings.Where(mgro => mgro.MixGroupId == mixGroupId))
+                {
+                    if (!await _mixGroupRoleOpeningManager.DeActivateAsync(mixGroupRoleOpening.MixGroupRoleOpeningId))
+                    {
+                        result = false;
+                    }
+                }
+            }
+            return result;
         }
     }
 }

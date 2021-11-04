@@ -18,6 +18,7 @@ namespace WaPesLeague.Data.Entities.Mix
 
 
         public virtual List<MixChannel> MixChannels { get; set; }
+        public virtual List<MixGroupRoleOpening> MixGroupRoleOpenings { get; set; }
         public virtual Server Server { get; set; }
     }
 }

@@ -40,6 +40,7 @@ namespace WaPesLeague.Data
         public DbSet<ServerFormationPosition> ServerFormationPositions { get; set; }
         public DbSet<ServerTeam> ServerTeams { get; set; }
         public DbSet<ServerTeamTag> ServerTeamTags { get; set; }
+        public DbSet<ServerRole> ServerRoles { get; set; }
 
 
         public DbSet<MixGroup> MixGroups { get; set; }
@@ -47,10 +48,12 @@ namespace WaPesLeague.Data
         public DbSet<MixChannelTeam> MixChannelTeams { get; set; }
         public DbSet<MixChannelTeamPosition> MixChannelTeamPositions { get; set; }
         public DbSet<MixChannelTeamTag> MixChannelTeamTags { get; set; }
+        public DbSet<MixGroupRoleOpening> MixGroupRoleOpenings { get; set; }
 
         public DbSet<MixSession> MixSessions { get; set; }
         public DbSet<MixTeam> MixTeams { get; set; }
         public DbSet<MixTeamTag> MixTeamTags { get; set; }
+        public DbSet<MixTeamRoleOpening> MixTeamRoleOpenings { get; set; }
         public DbSet<MixPosition> MixPositions { get; set; }
         public DbSet<MixPositionReservation> MixPositionReservations { get; set; }
         public DbSet<MixUserPositionSessionStat> MixUserPositionSessionStats { get; set; }
@@ -75,11 +78,13 @@ namespace WaPesLeague.Data
             modelBuilder.ApplyConfiguration(new ServerFormationConfiguration());
             modelBuilder.ApplyConfiguration(new ServerFormationPositionConfiguration());
             modelBuilder.ApplyConfiguration(new ServerFormationTagConfiguration());
+            modelBuilder.ApplyConfiguration(new ServerRoleConfiguration());
 
             modelBuilder.ApplyConfiguration(new PlatformConfiguration());
 
             #region mix
             modelBuilder.ApplyConfiguration(new MixGroupConfiguration());
+            modelBuilder.ApplyConfiguration(new MixGroupRoleOpeningConfiguration());
 
             modelBuilder.ApplyConfiguration(new MixChannelConfiguration());
             modelBuilder.ApplyConfiguration(new MixChannelTeamConfiguration());
@@ -89,6 +94,7 @@ namespace WaPesLeague.Data
             modelBuilder.ApplyConfiguration(new MixSessionConfiguration());
             modelBuilder.ApplyConfiguration(new MixTeamConfiguration());
             modelBuilder.ApplyConfiguration(new MixTeamTagConfiguration());
+            modelBuilder.ApplyConfiguration(new MixTeamRoleOpeningConfiguration());
 
             modelBuilder.ApplyConfiguration(new MixPositionConfiguration());
             modelBuilder.ApplyConfiguration(new MixPositionReservationConfiguration());

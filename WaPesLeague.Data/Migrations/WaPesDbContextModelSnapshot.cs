@@ -424,6 +424,40 @@ namespace WaPesLeague.Data.Migrations
                     b.ToTable("Servers");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerRole", b =>
+                {
+                    b.Property<int>("ServerRoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("DiscordRoleId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("ServerId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ServerRoleId");
+
+                    b.HasIndex("DiscordRoleId")
+                        .HasDatabaseName("IX_Server_DiscordServerRoleIdId");
+
+                    b.HasIndex("ServerId");
+
+                    b.ToTable("ServerRoles");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerTeam", b =>
                 {
                     b.Property<int>("ServerTeamId")
@@ -1475,6 +1509,40 @@ namespace WaPesLeague.Data.Migrations
                     b.ToTable("MixGroups");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixGroupRoleOpening", b =>
+                {
+                    b.Property<int>("MixGroupRoleOpeningId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Minutes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MixGroupId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServerRoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MixGroupRoleOpeningId");
+
+                    b.HasIndex("MixGroupId");
+
+                    b.HasIndex("ServerRoleId");
+
+                    b.ToTable("MixGroupRoleOpenings");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixPosition", b =>
                 {
                     b.Property<int>("MixPositionId")
@@ -1551,6 +1619,9 @@ namespace WaPesLeague.Data.Migrations
                     b.Property<DateTime?>("DateClosed")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("DateLastUpdated")
                         .HasColumnType("datetime2");
 
@@ -1622,6 +1693,34 @@ namespace WaPesLeague.Data.Migrations
                     b.HasIndex("MixSessionId");
 
                     b.ToTable("MixTeams");
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixTeamRoleOpening", b =>
+                {
+                    b.Property<int>("MixTeamRoleOpeningId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("End")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MixTeamId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServerRoleId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("MixTeamRoleOpeningId");
+
+                    b.HasIndex("MixTeamId");
+
+                    b.HasIndex("ServerRoleId");
+
+                    b.ToTable("MixTeamRoleOpenings");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixTeamTag", b =>
@@ -2322,6 +2421,17 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("Division");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerRole", b =>
+                {
+                    b.HasOne("WaPesLeague.Data.Entities.Discord.Server", "Server")
+                        .WithMany("ServerRoles")
+                        .HasForeignKey("ServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Server");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerTeam", b =>
                 {
                     b.HasOne("WaPesLeague.Data.Entities.Discord.Server", "Server")
@@ -2612,6 +2722,25 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("Server");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixGroupRoleOpening", b =>
+                {
+                    b.HasOne("WaPesLeague.Data.Entities.Mix.MixGroup", "MixGroup")
+                        .WithMany("MixGroupRoleOpenings")
+                        .HasForeignKey("MixGroupId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("WaPesLeague.Data.Entities.Discord.ServerRole", "ServerRole")
+                        .WithMany("MixGroupRoleOpenings")
+                        .HasForeignKey("ServerRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MixGroup");
+
+                    b.Navigation("ServerRole");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixPosition", b =>
                 {
                     b.HasOne("WaPesLeague.Data.Entities.Mix.MixTeam", "MixTeam")
@@ -2677,6 +2806,25 @@ namespace WaPesLeague.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("MixSession");
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixTeamRoleOpening", b =>
+                {
+                    b.HasOne("WaPesLeague.Data.Entities.Mix.MixTeam", "MixTeam")
+                        .WithMany("MixTeamRoleOpenings")
+                        .HasForeignKey("MixTeamId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("WaPesLeague.Data.Entities.Discord.ServerRole", "ServerRole")
+                        .WithMany("MixTeamRoleOpenings")
+                        .HasForeignKey("ServerRoleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("MixTeam");
+
+                    b.Navigation("ServerRole");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixTeamTag", b =>
@@ -2863,6 +3011,15 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("PositionTags");
 
                     b.Navigation("ServerFormations");
+
+                    b.Navigation("ServerRoles");
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerRole", b =>
+                {
+                    b.Navigation("MixGroupRoleOpenings");
+
+                    b.Navigation("MixTeamRoleOpenings");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerTeam", b =>
@@ -2940,6 +3097,8 @@ namespace WaPesLeague.Data.Migrations
             modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixGroup", b =>
                 {
                     b.Navigation("MixChannels");
+
+                    b.Navigation("MixGroupRoleOpenings");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixPosition", b =>
@@ -2957,6 +3116,8 @@ namespace WaPesLeague.Data.Migrations
             modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixTeam", b =>
                 {
                     b.Navigation("Formation");
+
+                    b.Navigation("MixTeamRoleOpenings");
 
                     b.Navigation("Tags");
                 });

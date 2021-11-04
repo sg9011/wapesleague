@@ -9,6 +9,7 @@ namespace WaPesLeague.Data.Infrastructure
         public static void RegisterManagers(this IServiceCollection services)
         {
             services.AddScoped<IMixGroupManager, MixGroupManager>();
+            services.AddScoped<IMixGroupRoleOpeningManager, MixGroupRoleOpeningManager>();
 
             services.AddScoped<IMixChannelManager, MixChannelManager>();
             services.AddScoped<IMixChannelTeamManager, MixChannelTeamManager>();
@@ -19,12 +20,14 @@ namespace WaPesLeague.Data.Infrastructure
             services.AddScoped<IMixPositionManager, MixPositionManager>();
             services.AddScoped<IMixSessionManager, MixSessionManager>();
             services.AddScoped<IMixTeamManager, MixTeamManager>();
+            services.AddScoped<IMixTeamRoleOpeningManager, MixTeamRoleOpeningManager>();
             services.AddScoped<IMixUserPositionSessionStatManager, MixUserPositionSessionStatManager>();
 
             services.AddScoped<IPlatformManager, PlatformManager>();
             services.AddScoped<IServerManager, ServerManager>();
             services.AddScoped<IServerTeamManager, ServerTeamManager>();
             services.AddScoped<IServerFormationManager, ServerFormationManager>();
+            services.AddScoped<IServerRoleManager, ServerRoleManager>();
 
             services.AddScoped<IFormationManager, FormationManager>();
             services.AddScoped<IPositionManager, PositionManager>();

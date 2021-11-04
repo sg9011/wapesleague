@@ -46,6 +46,10 @@ namespace WaPesLeague.Data.Entities.User.Configurations
             builder.HasMany(s => s.DefaultTeams)
                 .WithOne(t => t.Server)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(s => s.ServerRoles)
+                .WithOne(sr => sr.Server)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

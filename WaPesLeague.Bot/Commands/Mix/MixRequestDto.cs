@@ -1,9 +1,10 @@
 ﻿using Base.Bot.Commands;
+using System.Collections.Generic;
 using WaPesLeague.Business.Dto.Mix;
 
 namespace WaPesLeague.Bot.Commands.Mix
 {
-    public class MixRequestDto
+    public class MixRequestDto //Poubelle
     {
         public MixRequestType RequestType { get; set; }
         public DiscordCommandProperties DiscordCommandProps { get; set; }
@@ -16,13 +17,26 @@ namespace WaPesLeague.Bot.Commands.Mix
         public int PlayerCount { get; set; }
         public string OldPosition { get; set; }
         public string NewPosition { get; set; }
+        public ulong? RoleId { get; set; }
+        public string RoleName { get; set; }
+        public int? Minutes { get; set; }
+        public List<string> RoleIdsPlayer1 { get; set; }
+        public List<string> RoleIdsPlayer2 { get; set; }
+        public List<string> ActorRoleIds { get; set; }
         public DiscordCommandProperties Player1 { get; set; }
         public DiscordCommandProperties Player2 { get; set; }
         public CreateMixRoomGroupDto CreateMixRoomGroupDto { get; set; } 
 
         public Data.Entities.Discord.Server Server { get; private set; }
 
-        public MixRequestDto(MixRequestType requestType, DiscordCommandProperties discordCommandProps, Data.Entities.Discord.Server server)
+        public MixRequestDto()
+        {
+            RoleIdsPlayer1 = new List<string>();
+            RoleIdsPlayer2 = new List<string>();
+            ActorRoleIds = new List<string>();
+        }
+
+        public MixRequestDto(MixRequestType requestType, DiscordCommandProperties discordCommandProps, Data.Entities.Discord.Server server) : this()
         {
             RequestType = requestType;
             DiscordCommandProps = discordCommandProps;
@@ -41,7 +55,10 @@ namespace WaPesLeague.Bot.Commands.Mix
                 $"GameServer: {GameServer ?? "null"} " +
                 $"PlayerCount: {PlayerCount} " +
                 $"OldPosition: {OldPosition ?? "null"} " +
-                $"NewPosition: {NewPosition ?? "null"}";
+                $"NewPosition: {NewPosition ?? "null"} " +
+                $"RoleId: {RoleId?.ToString() ?? "null"} " +
+                $"RoleName: {RoleName ?? "null"} " +
+                $"Minutes: {Minutes?.ToString() ?? "null"} ";
         }
     }
 }

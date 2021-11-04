@@ -16,6 +16,7 @@
         OpenTeam,
         ShowMix,
         CleanMix,
-        Swap
+        Swap,
+        RoleRegistration
     }
 }

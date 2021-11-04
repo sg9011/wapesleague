@@ -10,5 +10,6 @@ namespace WaPesLeague.Business.Workflows.Interfaces
         public Task<DiscordWorkflowResult> CreateMixGroupAsync(CreateMixRoomGroupDto dto);
         public Task HandleAutoCloseAndRecreateOfMixSesisons();
         public Task<DiscordWorkflowResult> DeActivateMixGroupAsync(DiscordCommandPropsDto propsDto);
+        public Task<DiscordWorkflowResult> RoleRegistrationAsync(DiscordCommandPropsDto props, ulong discordRoleId, string roleName, int serverId, int minutes);
     }
 }

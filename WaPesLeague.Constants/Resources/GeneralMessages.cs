@@ -84,6 +84,7 @@ namespace WaPesLeague.Constants.Resources
         public Dictionary<string, string> NothingChanged { get; set; }
         public Dictionary<string, string> NoValueDefined { get; set; }
         public Dictionary<string, string> OpenNewMixSessionInChannel { get; set; }
+        public Dictionary<string, string> OnlyRoleCanSignInUntil { get; set; }
         public Dictionary<string, string> ParentPosition { get; set; }
         public Dictionary<string, string> PasswordDescription { get; set; }
         public Dictionary<string, string> PasswordTitle { get; set; }

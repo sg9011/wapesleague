@@ -1,0 +1,30 @@
+{
+  "DefaultServerSettings": {
+	"DefaultUsePasswordForSessions": false,
+	"DefaultUseServerForSessions": false,
+	"DefaultShowPESSideSelectionInfo": false,
+	"DefaultSessionRecurringWithAClosedTeam": false,
+	"DefaultSessionRecurringWithAllOpen": true,
+	"DefaultAutoCreateExtraSessionsWhenAllTeamsOpen": true,
+	"DefaultAutoCreateExtraSessionsWithAClosedTeam": false,
+	"DefaultStartTime": 16,
+	"DefaultHoursToOpenRegistrationBeforeStart": 4,
+	"DefaultSessionDuration": 12,
+	"DefaultSessionExtraInfo": "This is a mixroom created by the MixBot\n**.in A GK** to sign in as Goalkeeper in Team A\n**.out** to sign yourself out",
+	"Teams": [
+	{
+		"Name": "Team_A",
+		"IsOpen": true,
+		"Tags": [ "A", "1" ]
+	},
+	{
+		"Name": "Team_B",
+		"IsOpen": true,
+		"Tags": [ "B", "2" ]
+	}
+	],
+	"TimeZoneName": "Romance Standard Time",
+	"AllowActiveSwapCommand": true,
+	"AllowInactiveSwapCommand": true
+  }
+}

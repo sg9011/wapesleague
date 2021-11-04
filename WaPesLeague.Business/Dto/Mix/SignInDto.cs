@@ -1,4 +1,6 @@
-﻿namespace WaPesLeague.Business.Dto.Mix
+﻿using System.Collections.Generic;
+
+namespace WaPesLeague.Business.Dto.Mix
 {
     public class SignInDto
     {
@@ -9,9 +11,11 @@
         public string Position { get; set; }
         public string ExtraInfo { get; set; }
         public int ServerId { get; set; }
+        public List<string> RoleIds { get; set; }
+        public List<string> ActorRoleIds { get; set; }
 
 
-        public SignInDto(ulong discordServerId, ulong discordChannelId, int userId, string team, string position, string extraInfo, int serverId)
+        public SignInDto(ulong discordServerId, ulong discordChannelId, int userId, string team, string position, string extraInfo, int serverId, List<string> roleIds, List<string> actorRoleIds)
         {
             DiscordServerId = discordServerId;
             DiscordChannelId = discordChannelId;
@@ -20,6 +24,8 @@
             Position = position;
             ExtraInfo = extraInfo;
             ServerId = serverId;
+            RoleIds = roleIds;
+            ActorRoleIds = actorRoleIds;
         }
     }
 }

@@ -14,6 +14,7 @@ using WaPesLeague.Constants;
 using WaPesLeague.Constants.Resources;
 using WaPesLeague.Data.Entities.Discord;
 using WaPesLeague.Data.Entities.Formation;
+using WaPesLeague.Data.Helpers;
 using WaPesLeague.Data.Managers.Interfaces;
 
 namespace WaPesLeague.Business.Workflows
@@ -106,6 +107,14 @@ namespace WaPesLeague.Business.Workflows
             MemoryCache.Set(Cache.GetServerId(updateServerSettingsDto.DiscordCommandPropsDto.ServerId).ToUpperInvariant(), updatedServer, TimeSpan.FromMinutes(1430));
 
             return new DiscordWorkflowResult(GeneralMessages.AppliedChanges.GetValueForLanguage(), true, new FollowUpParameters() { Server = updatedServer });
+        }
+
+        public async Task<DiscordWorkflowResult> GetTimeAsync(ulong discordServerId, string discordServerName)
+        {
+            var server = await GetServerFromCacheOrDbAsync(discordServerId, discordServerName);
+            var time = new Time(DateTimeHelper.GetNowForApplicationTimeZone(server.TimeZoneName));
+
+            return new DiscordWorkflowResult(time.ToDiscordString(), true);
         }
 
         private async Task UpdateServerTeamIfNeededAsync(ServerTeam team, string name, bool isOpen)

@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
 using System.Threading;
 using System.Threading.Tasks;
+using WaPesLeague.Business.Workflows.Interfaces;
 using WaPesLeague.Constants;
 using WaPesLeague.Constants.Resources;
-using WaPesLeague.Data.Helpers;
 using WaPesLeague.Data.Managers.Interfaces;
 
 namespace WaPesLeague.Business.Dto.Mix
@@ -12,17 +12,21 @@ namespace WaPesLeague.Business.Dto.Mix
     {
         private readonly IMixChannelManager _mixChannelManager;
         private readonly IMixSessionManager _mixSessionManager;
+        private readonly IMixGroupRoleOpeningWorkflow _mixGroupRoleOpeningWorkflow;
+        private readonly IMixSessionWorkflow _mixSessionWorkflow;
         private readonly ErrorMessages ErrorMessages;
         private readonly GeneralMessages GeneralMessages;
 
         private bool hasChannel { get; set; }
         private bool userNotAlreadyActiveInOtherMixChannel { get; set; }
 
-        public SignInDtoValidator(IMixChannelManager mixChannelManager, IMixSessionManager mixSessionManager, ErrorMessages errorMessages, GeneralMessages generalMessages)
+        public SignInDtoValidator(IMixChannelManager mixChannelManager, IMixSessionManager mixSessionManager, IMixGroupRoleOpeningWorkflow mixGroupRoleOpeningWorkflow, IMixSessionWorkflow mixSessionWorkflow, ErrorMessages errorMessages, GeneralMessages generalMessages)
         {
             CascadeMode = CascadeMode.Stop;
             _mixChannelManager = mixChannelManager;
             _mixSessionManager = mixSessionManager;
+            _mixGroupRoleOpeningWorkflow = mixGroupRoleOpeningWorkflow;
+            _mixSessionWorkflow = mixSessionWorkflow;
             ErrorMessages = errorMessages;
             GeneralMessages = generalMessages;
             
@@ -63,7 +67,7 @@ namespace WaPesLeague.Business.Dto.Mix
             if (!userNotAlreadyActiveInOtherMixChannel)
                 return true;
 
-            return await _mixSessionManager.HasOpenMixSessionByDiscordIds(dto.DiscordServerId.ToString(), dto.DiscordChannelId.ToString(), DateTimeHelper.GetDatabaseNow());
+            return await _mixSessionWorkflow.ValidateWithinValidHours(dto.DiscordServerId.ToString(), dto.DiscordChannelId.ToString(), dto.RoleIds);
         }
     }
 }

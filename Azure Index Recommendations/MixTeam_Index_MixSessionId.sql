@@ -1,0 +1,1 @@
+CREATE NONCLUSTERED INDEX [nci_wi_MixTeams_1148FA1D686965352555756B90D9BE36] ON [dbo].[MixTeams] ([MixSessionId]) INCLUDE ([LockedTeamPlayerCount], [Name], [PositionsLocked]) WITH (ONLINE = ON)

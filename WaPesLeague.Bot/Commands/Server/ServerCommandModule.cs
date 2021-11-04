@@ -25,6 +25,30 @@ namespace WaPesLeague.Bot.Commands.Server
             _mapper = mapper;
         }
 
+        [Command("ServerTime"), Aliases("Time", "GetTime", "GetServerTime")]
+        [Description("Get the server time")]
+        public async Task GetServerTimeAsync(CommandContext ctx)
+        {
+            try
+            {
+                if (ctx.Guild == null)
+                {
+                    await ctx.RespondAsync(ErrorMessages.PrivateServerNotAllowedError.GetValueForLanguage());
+                    return;
+                }
+
+                var result = await _serverWorkflow.GetTimeAsync(ctx.Guild.Id, ctx.Guild.Name);
+
+                await ReplyToRequest(ctx.Message, result.Message);
+            }
+            catch (Exception ex)
+            {
+                _ = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
+                await ctx.RespondAsync(string.Format(ErrorMessages.BaseError.GetValueForLanguage(), ex.Message));
+            }
+
+        }
+
         [Command("GetServer"), Aliases("DefaultsServer", "ServerDefaults")]
         [Description("Get the server settings")]
         public async Task GetServerSettings(CommandContext ctx)

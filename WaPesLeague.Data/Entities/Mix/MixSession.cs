@@ -12,7 +12,7 @@ namespace WaPesLeague.Data.Entities.Mix
         public DateTime DateToClose { get; set; }
         public DateTime? DateClosed { get; set; }
         public DateTime? DateStatsCalculated { get; set; }
-        //public DateTime DateCreated { get; set; }
+        public DateTime? DateCreated { get; set; }
         public int CrashCount { get; set; }
         public int MatchCount { get; set; }
         public DateTime? DateLastUpdated { get; set; } //used to validate crashcount and matchcount

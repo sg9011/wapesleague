@@ -9,5 +9,6 @@ namespace WaPesLeague.Business.Workflows.Interfaces
     {
         public Task<Server> GetOrCreateServerAsync(ulong discordServerId, string discordServerName);
         public Task<DiscordWorkflowResult> UpdateAsync(UpdateServerSettingsDto updateServerSettingsDto);
+        public Task<DiscordWorkflowResult> GetTimeAsync(ulong discordServerId, string discordServerName);
     }
 }

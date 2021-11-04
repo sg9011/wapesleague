@@ -82,6 +82,7 @@ namespace WaPesLeague.Business.Workflows
                 DateStart = start,
                 DateRegistrationOpening = registrationTime,
                 DateToClose = start.AddHours((double)mixChannel.MixGroup.MaxSessionDurationInHours),
+                DateCreated = dbNow,
                 CrashCount = 0,
                 MatchCount = 0,
                 DateLastUpdated = dbNow,
@@ -265,9 +266,6 @@ namespace WaPesLeague.Business.Workflows
             {
                 
                 var mixGroupRoleOpenings = (await _mixGroupRoleOpeningWorkflow.GetMixGroupRoleOpeningsFromCacheOrDbAsync()).Where(mgro => mgro.MixGroupId == mixSession.MixChannel.MixGroupId).ToList();
-                //var dbNow = DateTimeHelper.GetDatabaseNow();
-                //var mixTeamIds = mixSession.MixTeams.Select(mt => mt.MixTeamId).ToList();
-                //var mixTeamRoleOpenings = (await _mixTeamRoleOpeningWorkflow.GetMixTeamRoleOpeningsFromCacheOrDbAsync()).Where(mtro => mixTeamIds.Contains(mtro.MixTeamId) && dbNow < mtro.End).ToList();
                 return MapMixSessionWithRelatedDataToDiscordString(mixSession, mixSession.MixChannel.MixGroup.Server.TimeZoneName, mixGroupRoleOpenings);
             } 
 

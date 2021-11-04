@@ -1619,6 +1619,9 @@ namespace WaPesLeague.Data.Migrations
                     b.Property<DateTime?>("DateClosed")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("DateLastUpdated")
                         .HasColumnType("datetime2");
 

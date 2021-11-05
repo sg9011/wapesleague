@@ -13,8 +13,9 @@ namespace WaPesLeague.Bot.Infrastructure
             services.AddBaseBotServices();
             services.AddSingleton<IHostedService, BotCloseSessionsService>();
             services.AddSingleton<IHostedService, BotNotifyService>();
-            services.AddSingleton<IHostedService, MixRequestService>();
+            services.AddSingleton<IHostedService, RequestService>();
             services.AddSingleton<IHostedService, BotCalculateStatService>();
+            services.AddSingleton<IHostedService, BotServerEventService>();
         }
 
         public static void RegisterSettings(this IServiceCollection services, IConfiguration configuration)

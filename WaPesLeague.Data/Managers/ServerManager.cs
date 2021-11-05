@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using WaPesLeague.Data.Entities.Discord;
 using WaPesLeague.Data.Managers.Interfaces;
@@ -31,6 +31,7 @@ namespace WaPesLeague.Data.Managers
                     .ThenInclude(sf => sf.Tags)
                 .Include(s => s.ServerFormations)
                     .ThenInclude(sf => sf.Positions)
+                .Include(s => s.ServerEvents)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.DiscordServerId == discordServerId && s.IsActive == true);
         }
@@ -57,6 +58,14 @@ namespace WaPesLeague.Data.Managers
                 await _context.SaveChangesAsync();
             }
             return currentServer;
+        }
+
+        public async Task<IReadOnlyCollection<Server>> GetServersAsync()
+        {
+            return await _context.Servers
+                .Include(s => s.ServerEvents)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<bool> DeActivateServerAsync(int server)

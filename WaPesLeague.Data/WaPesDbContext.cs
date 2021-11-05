@@ -41,6 +41,7 @@ namespace WaPesLeague.Data
         public DbSet<ServerTeam> ServerTeams { get; set; }
         public DbSet<ServerTeamTag> ServerTeamTags { get; set; }
         public DbSet<ServerRole> ServerRoles { get; set; }
+        public DbSet<ServerEvent> ServerEvents { get; set; }
 
 
         public DbSet<MixGroup> MixGroups { get; set; }
@@ -79,6 +80,7 @@ namespace WaPesLeague.Data
             modelBuilder.ApplyConfiguration(new ServerFormationPositionConfiguration());
             modelBuilder.ApplyConfiguration(new ServerFormationTagConfiguration());
             modelBuilder.ApplyConfiguration(new ServerRoleConfiguration());
+            modelBuilder.ApplyConfiguration(new ServerEventConfiguration());
 
             modelBuilder.ApplyConfiguration(new PlatformConfiguration());
 

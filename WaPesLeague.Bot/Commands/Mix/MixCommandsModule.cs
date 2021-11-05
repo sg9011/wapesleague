@@ -325,8 +325,16 @@ namespace WaPesLeague.Bot.Commands.Mix
             embed.Footer = new DiscordEmbedBuilder.EmbedFooter()
             {
                 Text = "Ask visualcomplexity for more info!"
+
             };
-            await ctx.RespondAsync(embed);
+            var button = new DiscordLinkButtonComponent("https://www.wapesleague.com/home/wapes-needs-you", "WaPes Needs You!");
+
+            var message = new DiscordMessageBuilder();
+            message.AddEmbed(embed);
+            message.AddComponents(button);
+            
+            
+            await ctx.RespondAsync(message);
         }
 
         [Command("Password"), Aliases("SetPassword", "PW", "P", "SefinirSenha", "Senha", "Sen", "Contraseña", "Contrasena")]

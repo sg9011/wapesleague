@@ -424,6 +424,44 @@ namespace WaPesLeague.Data.Migrations
                     b.ToTable("Servers");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerEvent", b =>
+                {
+                    b.Property<int>("ServerEventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ActionEntity")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ActionValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("EventValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ServerId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ServerEventId");
+
+                    b.HasIndex("ServerId");
+
+                    b.ToTable("ServerEvents");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerRole", b =>
                 {
                     b.Property<int>("ServerRoleId")
@@ -2236,6 +2274,9 @@ namespace WaPesLeague.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<DateTime?>("DiscordJoin")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("DiscordMention")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -2256,6 +2297,9 @@ namespace WaPesLeague.Data.Migrations
 
                     b.Property<int>("ServerId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("ServerJoin")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -2419,6 +2463,17 @@ namespace WaPesLeague.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Division");
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerEvent", b =>
+                {
+                    b.HasOne("WaPesLeague.Data.Entities.Discord.Server", "Server")
+                        .WithMany("ServerEvents")
+                        .HasForeignKey("ServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Server");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerRole", b =>
@@ -3009,6 +3064,8 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("MixGroups");
 
                     b.Navigation("PositionTags");
+
+                    b.Navigation("ServerEvents");
 
                     b.Navigation("ServerFormations");
 

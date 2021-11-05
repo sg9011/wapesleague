@@ -50,6 +50,10 @@ namespace WaPesLeague.Data.Entities.User.Configurations
             builder.HasMany(s => s.ServerRoles)
                 .WithOne(sr => sr.Server)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(s => s.ServerEvents)
+                .WithOne(sr => sr.Server)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

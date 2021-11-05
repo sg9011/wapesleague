@@ -12,7 +12,7 @@ namespace WaPesLeague.Bot.Services
     public class BotCalculateStatService : BaseBackgroundService<BotCalculateStatService>
     {
         private readonly IServiceProvider _provider;
-        private const int delayMilliSeconds = 72000000; //12hours
+        private const int delayMilliSeconds = 43200000; //12hours
 
         public BotCalculateStatService(ILogger<BotCalculateStatService> logger, IServiceProvider serviceProvider) : base(logger)
         {

@@ -19,6 +19,9 @@ namespace WaPesLeague.Business.Infrastructure
             services.AddScoped<IPositionWorkflow, PositionWorkflow>();
             services.AddScoped<IServerRoleWorkflow, ServerRoleWorkflow>();
             services.AddScoped<IMixGroupRoleOpeningWorkflow, MixGroupRoleOpeningWorkflow>();
+
+
+            services.AddScoped<IProcessFileImportWorkflow, ProcessFileImportWorkflow>();
         }
     }
 }

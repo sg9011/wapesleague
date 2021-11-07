@@ -1,6 +1,6 @@
 using Base.Bot.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+//using Microsoft.Extensions.Hosting;
 using WaPesLeague.API.Infrastructure;
 
 namespace WaPesLeague.API

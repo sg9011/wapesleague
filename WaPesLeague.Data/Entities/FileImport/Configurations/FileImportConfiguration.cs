@@ -9,7 +9,8 @@ namespace WaPesLeague.Data.Entities.FileImport.Configurations
         {
             builder.Property(fi => fi.FileStatus).HasConversion<string>().HasMaxLength(20).IsRequired(true);
             builder.Property(fi => fi.DateCreated).IsRequired(true);
-            builder.Property(fi => fi.ErrorMessage).IsRequired(true);
+            builder.Property(fi => fi.ErrorMessage).IsRequired(false);
+            builder.Property(gs => gs.RecordType).HasMaxLength(100).HasConversion<string>();
 
             builder.HasOne(fi => fi.FileImportType)
                 .WithMany(fit => fit.GoogleSheetImports)

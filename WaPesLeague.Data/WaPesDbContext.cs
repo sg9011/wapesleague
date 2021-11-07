@@ -2,6 +2,7 @@
 using WaPesLeague.Data.Entities.Association.Configurations;
 using WaPesLeague.Data.Entities.Discord;
 using WaPesLeague.Data.Entities.Discord.Configurations;
+using WaPesLeague.Data.Entities.FileImport;
 using WaPesLeague.Data.Entities.FileImport.Configurations;
 using WaPesLeague.Data.Entities.Formation;
 using WaPesLeague.Data.Entities.Formation.Configurations;
@@ -65,6 +66,19 @@ namespace WaPesLeague.Data
         public DbSet<Position> Positions { get; set; }
         public DbSet<PositionGroup> PositionGroups { get; set; }
         public DbSet<PositionTag> PositionTags { get; set; }
+
+        public DbSet<GoogleSheetImportType> GoogleSheetImportTypes { get; set; }
+        public DbSet<FileImport> FileImports { get; set; }
+        public DbSet<FileImportRecord> FileImportRecords { get; set; }
+
+        public DbSet<Entities.Association.AssociationTenant> AssociationTenants { get; set; }
+        public DbSet<Entities.Association.Association> Associations { get; set; }
+        public DbSet<Entities.Association.AssociationLeagueGroup> AssociationLeagueGroups { get; set; }
+        public DbSet<Entities.Association.AssociationLeagueSeason> AssociationLeagueSeasons { get; set; }
+        public DbSet<Entities.Association.Division> Divisions { get; set; }
+        public DbSet<Entities.Association.DivisionRound> DivisionRounds { get; set; }
+        public DbSet<Entities.Association.DivisionGroup> DivisionGroups { get; set; }
+        public DbSet<Entities.Association.DivisionGroupRound> DivisionGroupRounds { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -138,7 +152,7 @@ namespace WaPesLeague.Data
             modelBuilder.ApplyConfiguration(new AssociationTeamPlayerConfiguration());
             #endregion
 
-            modelBuilder.ApplyConfiguration(new FileImportTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GoogleSheetTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FileImportConfiguration());
             modelBuilder.ApplyConfiguration(new FileImportRecordConfiguration());
 

@@ -6,5 +6,6 @@ namespace WaPesLeague.GoogleSheets.Interfaces
     public interface IImportFileTabDataHandler
     {
         public Task<List<ImportFileTabRecord>> HandleAsync(string fileName, string tab, string fileId);
+        public Task<List<ImportFileTabRecord>> ImportGoogleSheetsAsync();
     }
 }

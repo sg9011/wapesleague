@@ -46,7 +46,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("AssociationTenantId");
 
-                    b.ToTable("Association");
+                    b.ToTable("Associations");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Association.AssociationLeagueGroup", b =>
@@ -76,7 +76,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("AssociationId");
 
-                    b.ToTable("AssociationLeagueGroup");
+                    b.ToTable("AssociationLeagueGroups");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Association.AssociationLeagueSeason", b =>
@@ -112,7 +112,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("AssociationLeagueGroupId");
 
-                    b.ToTable("AssociationLeagueSeason");
+                    b.ToTable("AssociationLeagueSeasons");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Association.AssociationTeam", b =>
@@ -206,7 +206,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasKey("AssociationTenantId");
 
-                    b.ToTable("AssociationTenant");
+                    b.ToTable("AssociationTenants");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Association.AssociationTenantPlayer", b =>
@@ -251,7 +251,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("AssociationLeagueSeasonId");
 
-                    b.ToTable("Division");
+                    b.ToTable("Divisions");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Association.DivisionGroup", b =>
@@ -262,6 +262,9 @@ namespace WaPesLeague.Data.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("DivisionRoundId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("GoogleSheetImportTypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -276,7 +279,11 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("DivisionRoundId");
 
-                    b.ToTable("DivisionGroup");
+                    b.HasIndex("GoogleSheetImportTypeId")
+                        .IsUnique()
+                        .HasFilter("[GoogleSheetImportTypeId] IS NOT NULL");
+
+                    b.ToTable("DivisionGroups");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Association.DivisionGroupRound", b =>
@@ -310,7 +317,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("DivisionGroupId");
 
-                    b.ToTable("DivisionGroupRound");
+                    b.ToTable("DivisionGroupRounds");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Association.DivisionRound", b =>
@@ -335,7 +342,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("DivisionId");
 
-                    b.ToTable("DivisionRound");
+                    b.ToTable("DivisionRounds");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.Server", b =>
@@ -554,7 +561,6 @@ namespace WaPesLeague.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ErrorMessage")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("FileImportTypeId")
@@ -565,11 +571,16 @@ namespace WaPesLeague.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("RecordType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.HasKey("FileImportId");
 
                     b.HasIndex("FileImportTypeId");
 
-                    b.ToTable("FileImport");
+                    b.ToTable("FileImports");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.FileImport.FileImportRecord", b =>
@@ -593,7 +604,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("FileImportId");
 
-                    b.ToTable("FileImportRecord");
+                    b.ToTable("FileImportRecords");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.FileImport.GoogleSheetImportType", b =>
@@ -609,15 +620,24 @@ namespace WaPesLeague.Data.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("GoogleSheetId")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("GoogleSheetName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StartRow")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
+                    b.Property<bool>("HasTitleRow")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Range")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecordType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("TabName")
                         .IsRequired()
@@ -626,7 +646,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasKey("GoogleSheetImportTypeId");
 
-                    b.ToTable("GoogleSheetImportType");
+                    b.ToTable("GoogleSheetImportTypes");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Formation.Formation", b =>
@@ -2440,6 +2460,10 @@ namespace WaPesLeague.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WaPesLeague.Data.Entities.FileImport.GoogleSheetImportType", null)
+                        .WithOne("DivisionGroup")
+                        .HasForeignKey("WaPesLeague.Data.Entities.Association.DivisionGroup", "GoogleSheetImportTypeId");
+
                     b.Navigation("DivisionRound");
                 });
 
@@ -3091,6 +3115,8 @@ namespace WaPesLeague.Data.Migrations
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.FileImport.GoogleSheetImportType", b =>
                 {
+                    b.Navigation("DivisionGroup");
+
                     b.Navigation("GoogleSheetImports");
                 });
 

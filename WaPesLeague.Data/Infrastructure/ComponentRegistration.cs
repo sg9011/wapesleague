@@ -1,5 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using WaPesLeague.Data.Managers;
+using WaPesLeague.Data.Managers.Association;
+using WaPesLeague.Data.Managers.Association.Interfaces;
+using WaPesLeague.Data.Managers.FileImport;
+using WaPesLeague.Data.Managers.FileImport.Intefaces;
 using WaPesLeague.Data.Managers.Interfaces;
 
 namespace WaPesLeague.Data.Infrastructure
@@ -36,6 +40,15 @@ namespace WaPesLeague.Data.Infrastructure
             services.AddScoped<IUserManager, UserManager>();
             services.AddScoped<IUserPlatformManager, UserPlatformManager>();
             services.AddScoped<IUserMemberManager, UserMemberManager>();
+
+            services.AddScoped<IGoogleSheetImportManager, GoogleSheetImportManager>();
+            services.AddScoped<IFileImportManager, FileImportManager>();
+            services.AddScoped<IFileImportRecordManager, FileImportRecordManager>();
+
+            services.AddScoped<IAssociationTenantManager, AssociationTenantManager>();
+            services.AddScoped<IAssociationManager, AssociationManager>();
+            services.AddScoped<IDivisionGroupManager, DivisionGroupManager>();
+            services.AddScoped<IDivisionGroupRoundManager, DivisionGroupRoundManager>();
         }
     }
 }

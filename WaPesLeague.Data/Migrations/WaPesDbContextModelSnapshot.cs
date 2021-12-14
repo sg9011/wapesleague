@@ -576,6 +576,32 @@ namespace WaPesLeague.Data.Migrations
                     b.ToTable("ServerRoles");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerSniping", b =>
+                {
+                    b.Property<int>("ServerSnipingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("IntervalAfterRegistrationOpeningInMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SignUpDelayDurationInHours")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SignUpDelayInMinutes")
+                        .HasColumnType("int");
+
+                    b.HasKey("ServerSnipingId");
+
+                    b.HasIndex("ServerId");
+
+                    b.ToTable("ServerSnipings");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerTeam", b =>
                 {
                     b.Property<int>("ServerTeamId")
@@ -2768,6 +2794,17 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("Server");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerSniping", b =>
+                {
+                    b.HasOne("WaPesLeague.Data.Entities.Discord.Server", "Server")
+                        .WithMany("ServerSnipings")
+                        .HasForeignKey("ServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Server");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerTeam", b =>
                 {
                     b.HasOne("WaPesLeague.Data.Entities.Discord.Server", "Server")
@@ -3372,6 +3409,8 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("ServerFormations");
 
                     b.Navigation("ServerRoles");
+
+                    b.Navigation("ServerSnipings");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerButtonGroup", b =>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WaPesLeague.Data.Entities.Association;
 using WaPesLeague.Data.Entities.FileImport.Enums;
 
@@ -14,6 +15,7 @@ namespace WaPesLeague.Data.Entities.FileImport
         public string GoogleSheetName { get; set; }
         public string TabName { get; set; }
         public string GoogleSheetId { get; set; }
+        public DateTime? ImportUntil { get; set; }
 
         public virtual List<FileImport> GoogleSheetImports { get; set; }
         public virtual DivisionGroup DivisionGroup { get; set; }

@@ -2,8 +2,6 @@
 using WaPesLeague.Business.Dto.Mix;
 using WaPesLeague.Data.Helpers;
 using WaPesLeague.Constants;
-using System.Globalization;
-using Microsoft.Extensions.Localization;
 using WaPesLeague.Constants.Resources;
 
 namespace WaPesLeague.Business.Helpers
@@ -38,7 +36,7 @@ namespace WaPesLeague.Business.Helpers
             }
             dto.HoursToOpenRegistrationBeforeStart = differenceBetweenStartAndRegistration;
 
-            //Because of the shit implementation this assignment should happen last
+            //this assignment should happen last, Because I m to stupid to implement it in a clean way
             if (bothTeamsAreOpen)
             {
                 dto.Name = options.GetValueForParams(MixChannelOptionsTags.NameParam()) ?? $"{new Time(dto.StartTime).ToDiscordChannelString()}-{generalMessages.Legend.GetValueForLanguage()}-{generalMessages.Mix.GetValueForLanguage()}";

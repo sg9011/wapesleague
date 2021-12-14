@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Localization;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using WaPesLeague.Business.Dto.Server;
 using WaPesLeague.Constants.Resources;
 

@@ -45,19 +45,19 @@ namespace WaPesLeague.Bot.Commands.Mix
 
         public string ToLogString()
         {
-            return "MixRequestDto: " +
-                $"RequestType: {RequestType} " +
-                $"UserId: {DiscordCommandProps?.UserId} ,ChannelId: {DiscordCommandProps?.ChannelId} " +
-                $"Team: {Team ?? "null"} " +
-                $"Position: {Position ?? "null"} " +
-                $"ExtraInfo: {ExtraInfo ?? "null"} " +
-                $"RoomName: {RoomName ?? "null"} " +
-                $"GameServer: {GameServer ?? "null"} " +
-                $"PlayerCount: {PlayerCount} " +
-                $"OldPosition: {OldPosition ?? "null"} " +
-                $"NewPosition: {NewPosition ?? "null"} " +
-                $"RoleId: {RoleId?.ToString() ?? "null"} " +
-                $"RoleName: {RoleName ?? "null"} " +
+            return "MixRequestDto: \n" +
+                $"RequestType: {RequestType} \n" +
+                $"UserId: {DiscordCommandProps?.UserId} ,ChannelId: {DiscordCommandProps?.ChannelId} \n" +
+                $"Team: {Team ?? "null"} \n" +
+                $"Position: {Position ?? "null"} \n" +
+                $"ExtraInfo: {ExtraInfo ?? "null"} \n" +
+                $"RoomName: {RoomName ?? "null"} \n" +
+                $"GameServer: {GameServer ?? "null"} \n" +
+                $"PlayerCount: {PlayerCount} \n" +
+                $"OldPosition: {OldPosition ?? "null"} \n" +
+                $"NewPosition: {NewPosition ?? "null"} \n" +
+                $"RoleId: {RoleId?.ToString() ?? "null"} \n" +
+                $"RoleName: {RoleName ?? "null"} \n" +
                 $"Minutes: {Minutes?.ToString() ?? "null"} ";
         }
     }

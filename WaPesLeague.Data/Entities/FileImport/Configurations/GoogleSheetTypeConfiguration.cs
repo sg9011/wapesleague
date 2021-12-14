@@ -12,6 +12,7 @@ namespace WaPesLeague.Data.Entities.FileImport.Configurations
             builder.Property(gs => gs.RecordType).HasMaxLength(100).HasConversion<string>();
             builder.Property(gs => gs.TabName).IsRequired(true).HasMaxLength(50);
             builder.Property(gs => gs.GoogleSheetId).IsRequired(true).HasMaxLength(50);
+            builder.Property(gs => gs.ImportUntil).IsRequired(false);
 
             builder.HasMany(gs => gs.GoogleSheetImports)
                 .WithOne(at => at.FileImportType)

@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using WaPesLeague.Data.Managers.FileImport.Intefaces;
+using FI = WaPesLeague.Data.Entities.FileImport;
 
 namespace WaPesLeague.Data.Managers.FileImport
 {
@@ -12,7 +15,7 @@ namespace WaPesLeague.Data.Managers.FileImport
             _context = context;
         }
 
-        public async Task<Entities.FileImport.FileImport> GetByIdAsync(int fileImportId)
+        public async Task<FI.FileImport> GetByIdAsync(int fileImportId)
         {
             return await _context.FileImports
                 .Include(fi => fi.FileImportRecords)
@@ -20,7 +23,15 @@ namespace WaPesLeague.Data.Managers.FileImport
                 .FirstOrDefaultAsync(fi => fi.FileImportId == fileImportId);
         }
 
-        public async Task<Entities.FileImport.FileImport> AddAsync(Entities.FileImport.FileImport fileImport)
+        public async Task<IReadOnlyCollection<FI.FileImport>> GetAllSuccessfulFileImports()
+        {
+            return await _context.FileImports
+                .Where(fi => fi.FileStatus == FI.Enums.FileStatus.Success)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<FI.FileImport> AddAsync(FI.FileImport fileImport)
         {
             await _context.FileImports.AddAsync(fileImport);
             await _context.SaveChangesAsync();
@@ -28,7 +39,7 @@ namespace WaPesLeague.Data.Managers.FileImport
             return fileImport;
         }
 
-        public async Task<Entities.FileImport.FileImport> UpdateAsync(Entities.FileImport.FileImport fileImport)
+        public async Task<FI.FileImport> UpdateAsync(FI.FileImport fileImport)
         {
             var currentFileImport = await _context.FileImports.FindAsync(fileImport.FileImportId);
             if (currentFileImport != null)

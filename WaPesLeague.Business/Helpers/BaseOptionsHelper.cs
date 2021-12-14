@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using WaPesLeague.Constants;
 using WaPesLeague.Constants.Resources;
@@ -64,6 +65,22 @@ namespace WaPesLeague.Business.Helpers
                 return editedValue.ToRealDecimal();
 
             throw new ArgumentException($"'{value}', {errorMessages.InvalidTimeValue.GetValueForLanguage()}");
+        }
+
+        public static decimal? OptionStringPercentageToDecimal(this string value, decimal? defaultValue, ErrorMessages errorMessages)
+        {
+            if (string.IsNullOrEmpty(value))
+                return defaultValue;
+
+            var numberChars = Array.FindAll(value.ToCharArray(), c => char.IsDigit(c) || char.Equals(c, ',') || char.Equals(c, '.'));
+            var editedValue = new string(numberChars);
+            editedValue = editedValue.Trim().Replace(',', '.');
+            if (!decimal.TryParse(editedValue, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal result))
+            {
+                throw new ArgumentException($"'{value}', {errorMessages.InvalidPercentageValue.GetValueForLanguage()}");
+            }
+
+            return result;
         }
     }
 }

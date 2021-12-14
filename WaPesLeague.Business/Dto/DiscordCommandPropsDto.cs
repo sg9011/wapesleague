@@ -8,6 +8,7 @@ namespace WaPesLeague.Business.Dto
         public ulong UserId { get; set; }
         public string UserName { get; set; }
         public string NickName { get; set; }
+        public string DiscordDiscriminator { get; set; }
         public DateTime DiscordJoin { get; set; }
         public DateTime? ServerJoin { get; set; }
         public string Mention { get; set; }

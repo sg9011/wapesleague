@@ -9,6 +9,7 @@ namespace WaPesLeague.Data.Entities.FileImport
         public int FileImportId { get; set; }
         public int FileImportTypeId { get; set; }
         public FileStatus FileStatus { get; set; }
+        public ProcessStatus ProcessStatus { get; set; }
         public RecordType RecordType { get; set; }
         public DateTime DateCreated { get; set; }
         public string ErrorMessage { get; set; }

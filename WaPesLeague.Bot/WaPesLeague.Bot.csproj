@@ -61,6 +61,7 @@
     <ProjectReference Include="..\Base.Bot\Base.Bot.csproj" />
     <ProjectReference Include="..\WaPesLeague.Business\WaPesLeague.Business.csproj" />
     <ProjectReference Include="..\WaPesLeague.Data\WaPesLeague.Data.csproj" />
+    <ProjectReference Include="..\WaPesLeague.GoogleSheets\WaPesLeague.GoogleSheets.csproj" />
   </ItemGroup>
 
 </Project>

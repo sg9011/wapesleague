@@ -123,6 +123,87 @@ namespace WaPesLeague.Bot.Commands.Server
             }
         }
 
+        [Command("GetServerButtons"), Aliases("GetButtons", "GetBtns", "GetServerBtns")]
+        [Description("Get the server buttons")]
+        public async Task GetServerButtonsAsync(CommandContext ctx, [RemainingText] string textToIgnore = null)
+        {
+            try
+            {
+                if (ctx.Guild == null)
+                {
+                    await ctx.RespondAsync(ErrorMessages.PrivateServerNotAllowedError.GetValueForLanguage());
+                    return;
+                }
+
+                var server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
+                if (!await ValidateHasTopTierRolesAsync(ctx))
+                    return;
+
+                var discordCommandProperties = new DiscordCommandProperties(ctx);
+                ServerRequestQueue.Queue.Enqueue(new ServerRequestDto(ServerRequestType.GetServerButtons, discordCommandProperties, server));
+            }
+            catch(Exception ex)
+            {
+                await ctx.RespondAsync(string.Format(ErrorMessages.BaseError.GetValueForLanguage(), ex.Message));
+            }
+        }
+
+        [Command("AddServerButton"), Aliases("AddButton", "AddBtn")]
+        [Description("Add a server button")]
+        public async Task AddServerButtonAsync(CommandContext ctx, [RemainingText] string options = null)
+        {
+            try
+            {
+                if (ctx.Guild == null)
+                {
+                    await ctx.RespondAsync(ErrorMessages.PrivateServerNotAllowedError.GetValueForLanguage());
+                    return;
+                }
+
+                var server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
+                if (!await ValidateHasTopTierRolesAsync(ctx))
+                    return;
+
+                var discordCommandProperties = new DiscordCommandProperties(ctx);
+                ServerRequestQueue.Queue.Enqueue(new ServerRequestDto(ServerRequestType.GetServerButtons, discordCommandProperties, server)
+                {
+                    Options = options
+                });
+            }
+            catch (Exception ex)
+            {
+                await ctx.RespondAsync(string.Format(ErrorMessages.BaseError.GetValueForLanguage(), ex.Message));
+            }
+        }
+
+        [Command("DeleteServerButton"), Aliases("DeleteButton", "DeleteBtn", "DelBtn", "RemoveButton", "RemoveBtn")]
+        [Description("Delete a server button")]
+        public async Task DeleteServerButtonAsync(CommandContext ctx, int buttonId)
+        {
+            try
+            {
+                if (ctx.Guild == null)
+                {
+                    await ctx.RespondAsync(ErrorMessages.PrivateServerNotAllowedError.GetValueForLanguage());
+                    return;
+                }
+
+                var server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
+                if (!await ValidateHasTopTierRolesAsync(ctx))
+                    return;
+
+                var discordCommandProperties = new DiscordCommandProperties(ctx);
+                ServerRequestQueue.Queue.Enqueue(new ServerRequestDto(ServerRequestType.DeleteButton, discordCommandProperties, server)
+                {
+                    ServerButtonId = buttonId
+                });
+            }
+            catch (Exception ex)
+            {
+                await ctx.RespondAsync(string.Format(ErrorMessages.BaseError.GetValueForLanguage(), ex.Message));
+            }
+        }
+
         [Command("GetTimeZones"), Aliases("TimeZones", "TimeZone", "ZonaDeHorario")]
         [Description("Get the timeZones as defined by microsoft")]
         public async Task GetTimeZones(CommandContext ctx, [Description("Get a list of existing timezones.")][RemainingText] string textToIgnore = null)

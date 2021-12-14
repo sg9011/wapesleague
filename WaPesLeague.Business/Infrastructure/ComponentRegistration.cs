@@ -18,10 +18,12 @@ namespace WaPesLeague.Business.Infrastructure
             services.AddScoped<IServerFormationWorkflow, ServerFormationWorkflow>();
             services.AddScoped<IPositionWorkflow, PositionWorkflow>();
             services.AddScoped<IServerRoleWorkflow, ServerRoleWorkflow>();
+            services.AddScoped<IServerButtonWorkflow, ServerButtonWorkflow>();
             services.AddScoped<IMixGroupRoleOpeningWorkflow, MixGroupRoleOpeningWorkflow>();
 
 
             services.AddScoped<IProcessFileImportWorkflow, ProcessFileImportWorkflow>();
+            services.AddScoped<IDiscordWorkflow, DiscordWorkflow>();
         }
     }
 }

@@ -12,6 +12,7 @@ namespace WaPesLeague.Data.Infrastructure
     {
         public static void RegisterManagers(this IServiceCollection services)
         {
+            services.AddScoped<IMetadataManager, MetadataManager>();
             services.AddScoped<IMixGroupManager, MixGroupManager>();
             services.AddScoped<IMixGroupRoleOpeningManager, MixGroupRoleOpeningManager>();
 
@@ -32,6 +33,8 @@ namespace WaPesLeague.Data.Infrastructure
             services.AddScoped<IServerTeamManager, ServerTeamManager>();
             services.AddScoped<IServerFormationManager, ServerFormationManager>();
             services.AddScoped<IServerRoleManager, ServerRoleManager>();
+            services.AddScoped<IServerButtonManager, ServerButtonManager>();
+            services.AddScoped<IServerButtonGroupManager, ServerButtonGroupManager>();
 
             services.AddScoped<IFormationManager, FormationManager>();
             services.AddScoped<IPositionManager, PositionManager>();
@@ -40,6 +43,7 @@ namespace WaPesLeague.Data.Infrastructure
             services.AddScoped<IUserManager, UserManager>();
             services.AddScoped<IUserPlatformManager, UserPlatformManager>();
             services.AddScoped<IUserMemberManager, UserMemberManager>();
+            services.AddScoped<IUserMetadataManager, UserMetadataManager>();
 
             services.AddScoped<IGoogleSheetImportManager, GoogleSheetImportManager>();
             services.AddScoped<IFileImportManager, FileImportManager>();
@@ -47,6 +51,8 @@ namespace WaPesLeague.Data.Infrastructure
 
             services.AddScoped<IAssociationTenantManager, AssociationTenantManager>();
             services.AddScoped<IAssociationManager, AssociationManager>();
+            services.AddScoped<IAssociationTeamManager, AssociationTeamManager>();
+            services.AddScoped<IAssociationTenantPlayerManager, AssociationTenantPlayerManager>();
             services.AddScoped<IDivisionGroupManager, DivisionGroupManager>();
             services.AddScoped<IDivisionGroupRoundManager, DivisionGroupRoundManager>();
         }

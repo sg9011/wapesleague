@@ -10,6 +10,7 @@ namespace WaPesLeague.Constants
         public const string Left = ":arrow_left:";
         public const string Right = ":arrow_right:";
         public const string Prefix = ".";
+        public const string DoubleLine = "==========";
 
         public static class SupportedLanguages
         {
@@ -33,6 +34,11 @@ namespace WaPesLeague.Constants
                     $"{Portuguese}\n" +
                     $"{Spannish}";
             }
+        }
+
+        public static class Regex
+        {
+            public const string EndsWithDiscriminator = @"#[0-9]{4}$";
         }
     }
 }

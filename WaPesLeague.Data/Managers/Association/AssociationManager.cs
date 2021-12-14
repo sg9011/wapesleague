@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 using WaPesLeague.Data.Managers.Association.Interfaces;
 
 namespace WaPesLeague.Data.Managers.Association
@@ -17,6 +19,25 @@ namespace WaPesLeague.Data.Managers.Association
             await _context.SaveChangesAsync();
 
             return association;
+        }
+
+        public async Task<Entities.Association.Association> GetAssociationByDivisionGroupIdAsync(int divisionGroupId)
+        {
+            return await _context.Associations
+                .Include(a => a.AssociationTenant)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => 
+                    a.AssociationLeagueGroups.Any(alg =>
+                        alg.AssociationLeagueSeasons.Any(als =>
+                            als.Divisions.Any(d =>
+                                d.DivisionRounds.Any(dr =>
+                                    dr.DivisionGroups.Any(dg =>
+                                        dg.DivisionGroupId == divisionGroupId)
+                                    )
+                                )
+                            )
+                        )
+                    );
         }
     }
 }

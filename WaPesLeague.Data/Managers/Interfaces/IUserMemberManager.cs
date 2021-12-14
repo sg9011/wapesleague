@@ -9,6 +9,7 @@ namespace WaPesLeague.Data.Managers.Interfaces
         public Task<UserMember> GetUserMemberByDiscordUserIdAndServerIdAsync(string discordUserId, string discordServerId);
         public Task<int?> GetUserIdByDiscordUserIdAsync(string discordUserId);
         public Task<UserMember> AddAsync(UserMember userMember);
+        public Task<List<UserMember>> AddMultipleAsync(List<UserMember> userMembers);
         public Task<UserMember> UpdateAsync(UserMember userMember);
         public Task<IReadOnlyCollection<UserMember>> GetUserMembersByUserIdsAndServerId(List<int> userIds, int serverId);
     }

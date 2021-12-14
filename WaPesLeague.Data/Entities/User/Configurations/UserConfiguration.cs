@@ -8,10 +8,12 @@ namespace WaPesLeague.Data.Entities.User.Configurations
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.HasIndex(u => u.UserGuid).HasDatabaseName("IX_Contacts_Guid");
+            builder.Property(u => u.DiscordName).HasMaxLength(100).IsRequired(false);
+            builder.Property(u => u.ExternalId).HasMaxLength(100).IsRequired(false);
             builder.Property(u => u.FirstName).HasMaxLength(50).IsRequired(false);
             builder.Property(u => u.LastName).HasMaxLength(50).IsRequired(false);
             builder.Property(u => u.ExtraInfo).HasMaxLength(2000).IsRequired(false);
-            builder.Property(u => u.Email).HasMaxLength(100).IsRequired(true);
+            builder.Property(u => u.Email).HasMaxLength(100).IsRequired(false);
 
             //builder.HasMany(u => u.PictureTypes)
             //    .WithOne(pt => pt.User)
@@ -20,6 +22,10 @@ namespace WaPesLeague.Data.Entities.User.Configurations
             //builder.HasMany(u => u.SocialMedias)
             //    .WithOne(sm => sm.User)
             //    .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(u => u.UserMetadatas)
+                .WithOne(um => um.User)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(u => u.PlatformUsers)
                 .WithOne(pu => pu.User)

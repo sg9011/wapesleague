@@ -46,7 +46,8 @@ namespace WaPesLeague.Business.Workflows
                     var userToCreate = new User()
                     {
                         UserGuid = Guid.NewGuid(),
-                        Email = propsDto.UserName ?? propsDto.UserId.ToString()
+                        DiscordName = propsDto.UserName,
+                        DiscordDiscriminator = propsDto.DiscordDiscriminator
                     };
                     var createdUser = await _userManager.AddAsync(userToCreate);
                     userId = createdUser.UserId;

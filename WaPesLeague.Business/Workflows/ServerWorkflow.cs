@@ -130,6 +130,12 @@ namespace WaPesLeague.Business.Workflows
             
         }
 
+        public async Task UpdateServerCacheValueAsync(ulong discordServerId)
+        {
+            var cacheEntry = await _serverManager.GetServerByDiscordIdAsync(discordServerId.ToString());
+            MemoryCache.Set(Cache.GetServerId(discordServerId).ToUpperInvariant(), cacheEntry, TimeSpan.FromMinutes(1430));
+        }
+
         private async Task UpdateServerTeamIfNeededAsync(ServerTeam team, string name, bool isOpen)
         {
             if (!string.Equals(team.Name, name, StringComparison.InvariantCultureIgnoreCase) || team.IsOpen != isOpen)
@@ -333,5 +339,7 @@ namespace WaPesLeague.Business.Workflows
 
             return dict;
         }
+
+        
     }
 }

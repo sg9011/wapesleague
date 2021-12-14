@@ -2,6 +2,7 @@
 {
     public enum RecordType
     {
-        LeagueResultLineV1
+        LeagueResultLineV1,
+        PlayerRegistrationRecordV1
     }
 }

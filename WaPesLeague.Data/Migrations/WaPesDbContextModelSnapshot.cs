@@ -37,6 +37,13 @@ namespace WaPesLeague.Data.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DefaultTeamType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Normal");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -147,7 +154,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("AssociationId");
 
-                    b.ToTable("AssociationTeam");
+                    b.ToTable("AssociationTeams");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Association.AssociationTeamPlayer", b =>
@@ -222,6 +229,11 @@ namespace WaPesLeague.Data.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
@@ -231,7 +243,7 @@ namespace WaPesLeague.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AssociationTenantPlayer");
+                    b.ToTable("AssociationTenantPlayers");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Association.Division", b =>
@@ -431,6 +443,67 @@ namespace WaPesLeague.Data.Migrations
                     b.ToTable("Servers");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerButton", b =>
+                {
+                    b.Property<int>("ServerButtonId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ServerButtonGroupId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ShowFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ShowUntil")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("URL")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.HasKey("ServerButtonId");
+
+                    b.HasIndex("ServerButtonGroupId");
+
+                    b.ToTable("ServerButtons");
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerButtonGroup", b =>
+                {
+                    b.Property<int>("ServerButtonGroupId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ButtonGroupType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasDefaultValue("ShowAllAtTheSameTime");
+
+                    b.Property<int>("ServerId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UseRate")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("decimal(18,8)");
+
+                    b.HasKey("ServerButtonGroupId");
+
+                    b.HasIndex("ServerId");
+
+                    b.ToTable("ServerButtonGroups");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerEvent", b =>
                 {
                     b.Property<int>("ServerEventId")
@@ -571,6 +644,13 @@ namespace WaPesLeague.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("ProcessStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("UnProcessed");
+
                     b.Property<string>("RecordType")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -629,6 +709,9 @@ namespace WaPesLeague.Data.Migrations
 
                     b.Property<bool>("HasTitleRow")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ImportUntil")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Range")
                         .IsRequired()
@@ -1414,6 +1497,121 @@ namespace WaPesLeague.Data.Migrations
                             Code = "Offides",
                             Description = "Offsides",
                             Order = 601
+                        });
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Metadata.Metadata", b =>
+                {
+                    b.Property<int>("MetadataId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("PropertyType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("String");
+
+                    b.HasKey("MetadataId");
+
+                    b.ToTable("Metadatas");
+
+                    b.HasData(
+                        new
+                        {
+                            MetadataId = 1,
+                            Code = "DiscordId",
+                            Description = "The Discord Id of the entity",
+                            PropertyType = "String"
+                        },
+                        new
+                        {
+                            MetadataId = 2,
+                            Code = "WaPesDiscordName",
+                            Description = "The Discord name used to register onto WaPes",
+                            PropertyType = "String"
+                        },
+                        new
+                        {
+                            MetadataId = 3,
+                            Code = "WaPesPSNName",
+                            Description = "The PSN name used to register onto WaPes",
+                            PropertyType = "String"
+                        },
+                        new
+                        {
+                            MetadataId = 4,
+                            Code = "SpeakEnglish",
+                            Description = "can speak english prop on registration",
+                            PropertyType = "Bool"
+                        },
+                        new
+                        {
+                            MetadataId = 5,
+                            Code = "FavouritePosition1",
+                            Description = "Favourite Position 1 prop on registration",
+                            PropertyType = "String"
+                        },
+                        new
+                        {
+                            MetadataId = 6,
+                            Code = "FavouritePosition2",
+                            Description = "Favourite Position 2 prop on registration",
+                            PropertyType = "String"
+                        },
+                        new
+                        {
+                            MetadataId = 7,
+                            Code = "Motto",
+                            Description = "Football Motto",
+                            PropertyType = "String"
+                        },
+                        new
+                        {
+                            MetadataId = 8,
+                            Code = "FootballStyle",
+                            Description = "Your FootballStyle",
+                            PropertyType = "String"
+                        },
+                        new
+                        {
+                            MetadataId = 9,
+                            Code = "Quality1",
+                            Description = "Football Quality 1",
+                            PropertyType = "String"
+                        },
+                        new
+                        {
+                            MetadataId = 10,
+                            Code = "Quality2",
+                            Description = "Football Quality 2",
+                            PropertyType = "String"
+                        },
+                        new
+                        {
+                            MetadataId = 11,
+                            Code = "Quality3",
+                            Description = "Football Quality 3",
+                            PropertyType = "String"
+                        },
+                        new
+                        {
+                            MetadataId = 12,
+                            Code = "WaPesJoinDate",
+                            Description = "WaPes Joining Date",
+                            PropertyType = "DateTime"
                         });
                 });
 
@@ -2259,8 +2457,18 @@ namespace WaPesLeague.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("DiscordDiscriminator")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DiscordName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("Email")
-                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ExternalId")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -2331,6 +2539,33 @@ namespace WaPesLeague.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserMembers");
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.User.UserMetadata", b =>
+                {
+                    b.Property<int>("UserMetadataId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("MetadataId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("UserMetadataId");
+
+                    b.HasIndex("MetadataId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserMetadatas");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.User.UserPlatform", b =>
@@ -2487,6 +2722,28 @@ namespace WaPesLeague.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Division");
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerButton", b =>
+                {
+                    b.HasOne("WaPesLeague.Data.Entities.Discord.ServerButtonGroup", "ButtonGroup")
+                        .WithMany("Buttons")
+                        .HasForeignKey("ServerButtonGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ButtonGroup");
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerButtonGroup", b =>
+                {
+                    b.HasOne("WaPesLeague.Data.Entities.Discord.Server", "Server")
+                        .WithMany("ButtonGroups")
+                        .HasForeignKey("ServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Server");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerEvent", b =>
@@ -2999,6 +3256,25 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.User.UserMetadata", b =>
+                {
+                    b.HasOne("WaPesLeague.Data.Entities.Metadata.Metadata", "Metadata")
+                        .WithMany("UserMetadatas")
+                        .HasForeignKey("MetadataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WaPesLeague.Data.Entities.User.User", "User")
+                        .WithMany("UserMetadatas")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Metadata");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.User.UserPlatform", b =>
                 {
                     b.HasOne("WaPesLeague.Data.Entities.Platform.Platform", "Platform")
@@ -3081,6 +3357,8 @@ namespace WaPesLeague.Data.Migrations
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.Server", b =>
                 {
+                    b.Navigation("ButtonGroups");
+
                     b.Navigation("DefaultTeams");
 
                     b.Navigation("Members");
@@ -3094,6 +3372,11 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("ServerFormations");
 
                     b.Navigation("ServerRoles");
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerButtonGroup", b =>
+                {
+                    b.Navigation("Buttons");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerRole", b =>
@@ -3161,6 +3444,11 @@ namespace WaPesLeague.Data.Migrations
             modelBuilder.Entity("WaPesLeague.Data.Entities.Match.MatchTeamStatType", b =>
                 {
                     b.Navigation("MatchTeamStats");
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Metadata.Metadata", b =>
+                {
+                    b.Navigation("UserMetadatas");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Mix.MixChannel", b =>
@@ -3249,6 +3537,8 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("PositionSessionStats");
 
                     b.Navigation("UserMembers");
+
+                    b.Navigation("UserMetadatas");
                 });
 #pragma warning restore 612, 618
         }

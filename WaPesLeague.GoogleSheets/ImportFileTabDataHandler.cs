@@ -34,62 +34,6 @@ namespace WaPesLeague.GoogleSheets
             _fileImportRecordManager = fileImportRecordManager;
             _logger = logger;
         }
-        //fileName: Copy WAPES Legends S04 Div 1
-        //tab: "Results"
-        //fileId: 1Abum30ooJyESOy6YGlcZLBKmRahujH1lnifeehPl_JY
-        public async Task<List<ImportFileTabRecord>> HandleAsync(string fileName, string tab, string fileId)
-        {
-            try
-            {
-                GoogleCredential credential;
-                using (var stream = new FileStream("googlesettings.json", FileMode.Open, FileAccess.Read))
-                {
-                    credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
-                }
-
-                service = new SheetsService(new BaseClientService.Initializer()
-                {
-                    HttpClientInitializer = credential,
-                    ApplicationName = fileName
-                });
-                var range = $"{tab}!A3:DZ315";
-                var request = service.Spreadsheets.Values.Get(fileId, range);
-                request.PrettyPrint = true;
-                var response = await request.ExecuteAsync();
-
-                var importFileTabRecords = new List<ImportFileTabRecord>();
-                if (response.Values != null && response.Values.Count > 1)
-                {
-                    var titleRow = response.Values.First();
-                    if (titleRow.Any())
-                    {
-                        var titleRowDict = titleRow.ToDictionary(t => titleRow.IndexOf(t), t => t);
-                        foreach (var row in response.Values.Skip(1))
-                        {
-                            var rowDict = new Dictionary<string, object>();
-                            foreach (var titleColumn in titleRowDict)
-                            {
-                                rowDict.Add(titleColumn.Value.ToString(), row.Count > titleColumn.Key ? row[titleColumn.Key] : string.Empty);
-                            }
-                            importFileTabRecords.Add(new ImportFileTabRecord()
-                            {
-                                Row = response.Values.IndexOf(row) + 1,
-                                Data = rowDict
-                            });
-                        }
-                    }
-                }
-                var json = JsonConvert.SerializeObject(importFileTabRecords);
-                return importFileTabRecords;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Something went wrong while importing tab: {tab} of file: {fileName}", ex);
-            }
-
-
-            return new List<ImportFileTabRecord>();
-        }
 
         public async Task<List<ImportFileTabRecord>> ImportGoogleSheetsAsync()
         {
@@ -104,7 +48,7 @@ namespace WaPesLeague.GoogleSheets
 
                 var importFileTabRecords = new List<ImportFileTabRecord>();
 
-                foreach (var googleImport in googleImports)
+                foreach (var googleImport in googleImports.Where(gi => !(gi.ImportUntil.HasValue && gi.GoogleSheetImports.Any(x => x.DateCreated > gi.ImportUntil.Value && x.FileStatus == FileStatus.Success))))
                 {
                     var fileImport = new FileImport()
                     {
@@ -113,7 +57,7 @@ namespace WaPesLeague.GoogleSheets
                         RecordType = googleImport.RecordType,
                         DateCreated = DateTimeHelper.GetDatabaseNow()
                     };
-                    await _fileImportManager.AddAsync(fileImport);//Does FileImport has an Id after this Save?
+                    await _fileImportManager.AddAsync(fileImport);
 
                     try
                     {
@@ -168,16 +112,14 @@ namespace WaPesLeague.GoogleSheets
                     }
                 }
 
-                var json = JsonConvert.SerializeObject(importFileTabRecords);
-
                 return importFileTabRecords;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "What is this shit!");
                 throw;
             }
-            
+
         }
 
         private GoogleCredential GetGoogleCredential()

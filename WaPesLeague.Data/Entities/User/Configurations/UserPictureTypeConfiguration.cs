@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace WaPesLeague.Data.Entities.User.Configurations
 {
-    public class UserPictureTypeConfiguration: IEntityTypeConfiguration<UserPictureType>
+    public class UserPictureTypeConfiguration : IEntityTypeConfiguration<UserPictureType>
     {
         public void Configure(EntityTypeBuilder<UserPictureType> builder)
         {

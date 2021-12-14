@@ -37,6 +37,15 @@ namespace WaPesLeague.Data.Managers
             return userMember;
         }
 
+        public async Task<List<UserMember>> AddMultipleAsync(List<UserMember> userMembers)
+        {
+            await _context.UserMembers.AddRangeAsync(userMembers);
+            await _context.SaveChangesAsync();
+
+            return userMembers;
+        }
+
+
         public async Task<UserMember> UpdateAsync(UserMember userMember)
         {
             var currentUserMember = await _context.UserMembers.FindAsync(userMember.UserMemberId);

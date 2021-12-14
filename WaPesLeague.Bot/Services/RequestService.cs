@@ -163,6 +163,9 @@ namespace WaPesLeague.Bot.Services
                                         case ServerRequestType.DeleteButton:
                                             result = await HandleDeleteServerButtonAsync(serverRequestsDto, scope);
                                             break;
+                                        case ServerRequestType.SetSniping:
+                                            result = await HandleSetSnipingAsync(serverRequestsDto, scope);
+                                            break;
                                         default:
                                             Logger.LogError(new ArgumentException($"{serverRequestsDto.RequestType} is not supported in the Hosted service: RequestService"), $"{serverRequestsDto.RequestType} is not supported in the Hosted service: RequestService");
                                             break;
@@ -361,6 +364,12 @@ namespace WaPesLeague.Bot.Services
             var serverButtonWorkflow = scope.ServiceProvider.GetRequiredService<IServerButtonWorkflow>();
             return await serverButtonWorkflow.HandleDeleteServerButtonAsync(serverRequestDto.Server, serverRequestDto.ServerButtonId.Value);
         }
+
+        private async Task<DiscordWorkflowResult> HandleSetSnipingAsync(ServerRequestDto serverRequestDto, IServiceScope scope)
+        {
+            var serverWorkflow = scope.ServiceProvider.GetRequiredService<IServerWorkflow>();
+            return await serverWorkflow.SetSnipingAsync(serverRequestDto.Server, serverRequestDto.SnipingIntervalAfterRegistrationOpeningInMinutes.Value, serverRequestDto.SnipingSignUpDelayInMinutes.Value, serverRequestDto.SnipingSignUpDelayDurationInHours.Value);
+        }
         #endregion
 
         #region GuildMemberAddedOrUpdated
@@ -543,7 +552,7 @@ namespace WaPesLeague.Bot.Services
                     {
                         var message = await channel1.GetMessageAsync(successResult.FollowUpParameters.DiscordMessageId);
                         var msg = await new DiscordMessageBuilder()
-                            .WithContent($"{Constants.DiscordEmoji.ThumbsDownString} {successResult.Message}")
+                            .WithContent($"{Constants.DiscordEmoji.ThumbsUpString} {successResult.Message}")
                             .AddDiscordLinkButtonsToMessageIfNeeded(successResult.FollowUpParameters.Server, new Random())
                             .WithReply(message.Id, true)
                             .SendAsync(channel1);

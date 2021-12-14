@@ -38,6 +38,7 @@ namespace WaPesLeague.Data.Entities.Discord
         public virtual List<ServerRole> ServerRoles { get; set; }
         public virtual List<ServerEvent> ServerEvents { get; set; }
         public virtual List<ServerButtonGroup> ButtonGroups { get; set; }
+        public virtual List<ServerSniping> ServerSnipings { get; set; }
 
         //public CultureInfo GetCultureInfo => new CultureInfo(Language ?? Constants.Bot.SupportedLanguages.English);
         public void SetDefaultThreadCurrentCulture()

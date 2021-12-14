@@ -141,6 +141,7 @@ namespace WaPesLeague.Constants.Resources
         public Dictionary<string, string> SignUserInTitle { get; set; }
         public Dictionary<string, string> SignUserOutDescription { get; set; }
         public Dictionary<string, string> SignUserOutTitle { get; set; }
+        public Dictionary<string, string> SnipingValuesSet { get; set; }
         public Dictionary<string, string> StartTimeDescription { get; set; }
         public Dictionary<string, string> StartTimeTitle { get; set; }
         public Dictionary<string, string> SwitchToSamePosition { get; set; }

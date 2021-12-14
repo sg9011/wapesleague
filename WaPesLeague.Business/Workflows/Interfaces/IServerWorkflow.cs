@@ -12,5 +12,6 @@ namespace WaPesLeague.Business.Workflows.Interfaces
         public Task<DiscordWorkflowResult> GetTimeAsync(ulong discordServerId, string discordServerName);
         public Task UpdateServerCacheValueAsync(ulong discordServerId);
         public Task HandleServerEventsAndActionsAsync();
+        public Task<DiscordWorkflowResult> SetSnipingAsync(Server server, int intervalAfterRegistrationOpeningInMinutes, int signUpDelayInMinutes, int signUpDelayDurationInHours);
     }
 }

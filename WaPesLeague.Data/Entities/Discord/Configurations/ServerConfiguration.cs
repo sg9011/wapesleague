@@ -58,6 +58,10 @@ namespace WaPesLeague.Data.Entities.User.Configurations
             builder.HasMany(s => s.ButtonGroups)
                 .WithOne(bg => bg.Server)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(s => s.ServerSnipings)
+                .WithOne(ss => ss.Server)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

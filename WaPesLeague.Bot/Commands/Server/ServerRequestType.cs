@@ -4,6 +4,7 @@
     {
         GetServerButtons,
         AddServerButton,
-        DeleteButton
+        DeleteButton,
+        SetSniping
     }
 }

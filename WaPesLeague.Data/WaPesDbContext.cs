@@ -52,6 +52,7 @@ namespace WaPesLeague.Data
         public DbSet<ServerEvent> ServerEvents { get; set; }
         public DbSet<ServerButtonGroup> ServerButtonGroups { get; set; }
         public DbSet<ServerButton> ServerButtons { get; set; }
+        public DbSet<ServerSniping> ServerSnipings { get; set; }
 
 
         public DbSet<MixGroup> MixGroups { get; set; }
@@ -111,6 +112,7 @@ namespace WaPesLeague.Data
             modelBuilder.ApplyConfiguration(new ServerEventConfiguration());
             modelBuilder.ApplyConfiguration(new ServerButtonGroupConfiguration());
             modelBuilder.ApplyConfiguration(new ServerButtonConfiguration());
+            modelBuilder.ApplyConfiguration(new ServerSnipingConfiguration());
 
             modelBuilder.ApplyConfiguration(new PlatformConfiguration());
 

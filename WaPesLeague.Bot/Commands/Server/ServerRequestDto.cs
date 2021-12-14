@@ -11,6 +11,10 @@ namespace WaPesLeague.Bot.Commands.Server
         public string Options { get; set; }
         public int? ServerButtonId { get; set; }
 
+        public int? SnipingIntervalAfterRegistrationOpeningInMinutes { get; set; }
+        public int? SnipingSignUpDelayInMinutes { get; set; }
+        public int? SnipingSignUpDelayDurationInHours { get; set; }
+
         public ServerRequestDto(ServerRequestType requestType, DiscordCommandProperties discordCommandProps, Data.Entities.Discord.Server server)
         {
             RequestType = requestType;

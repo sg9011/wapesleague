@@ -21,6 +21,7 @@ namespace WaPesLeague.Constants.Resources
         public Dictionary<string, string> FormationUnknown { get; set; }
         public Dictionary<string, string> InvalidBoolValue { get; set; }
         public Dictionary<string, string> InvalidPercentageValue { get; set; }
+        public Dictionary<string, string> InvalidSnipingValues { get; set; }
         public Dictionary<string, string> InvalidTimesForMixRoom { get; set; }
         public Dictionary<string, string> InvalidTimeValue { get; set; }
         public Dictionary<string, string> NewPositionEmpty { get; set; }

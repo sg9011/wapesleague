@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +28,21 @@ namespace WaPesLeague.Data.Managers
             return (await _context.UserMembers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(um => um.DiscordUserId == discordUserId))?.UserId;
+        }
+
+        public async Task<UserMember> GetUserMemberWithSnipersByUserIdAndServerIdAsync(int userId, int serverId, DateTime date)
+        {
+            return await _context.UserMembers
+                .Include(um => um.Snipers.Where(s => s.DateEnd > date))
+                .AsNoTracking()
+                .FirstOrDefaultAsync(um => um.UserId == userId && um.ServerId == serverId);
+        }
+
+        public async Task<int?> GetUserMemberIdByUserIdAndServerIdAsync(int userId, int serverId)
+        {
+            return (await _context.UserMembers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(um => um.UserId == userId && um.ServerId == serverId))?.UserMemberId;
         }
 
         public async Task<UserMember> AddAsync(UserMember userMember)

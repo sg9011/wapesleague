@@ -38,6 +38,7 @@ namespace WaPesLeague.Constants.Resources
         public Dictionary<string, string> NoPlatformFoundForCode { get; set; }
         public Dictionary<string, string> NoPositionFoundInTeam { get; set; }
         public Dictionary<string, string> NotAllowedToDeletePositionCode { get; set; }
+        public Dictionary<string, string> NotSnipingAgain { get; set; }
         public Dictionary<string, string> NoTeamFound { get; set; }
         public Dictionary<string, string> NothingToClose { get; set; }
         public Dictionary<string, string> NothingToDelete { get; set; }

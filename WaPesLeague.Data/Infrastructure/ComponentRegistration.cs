@@ -36,6 +36,7 @@ namespace WaPesLeague.Data.Infrastructure
             services.AddScoped<IServerButtonManager, ServerButtonManager>();
             services.AddScoped<IServerButtonGroupManager, ServerButtonGroupManager>();
             services.AddScoped<IServerSnipingManager, ServerSnipingManager>();
+            services.AddScoped<ISniperManager, SniperManager>();
 
             services.AddScoped<IFormationManager, FormationManager>();
             services.AddScoped<IPositionManager, PositionManager>();

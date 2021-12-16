@@ -143,7 +143,7 @@ namespace WaPesLeague.Data.Managers
         public async Task<MixGroupIdAndRegistrationTime> HasOpenMixSessionByDiscordIds(string discordServerid, string discordChannelId, DateTime time)
         {
             var mixSession = await _context.MixSessions
-                .Include(ms => ms.MixChannel)
+                //.Include(ms => ms.MixChannel)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(ms =>
                     ms.MixChannel.DiscordChannelId == discordChannelId

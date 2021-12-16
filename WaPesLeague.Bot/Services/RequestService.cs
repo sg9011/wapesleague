@@ -23,6 +23,7 @@ using WaPesLeague.Business.Workflows.Interfaces;
 using WaPesLeague.Constants;
 using WaPesLeague.Constants.Resources;
 using WaPesLeague.Data.Entities.Discord.Enums;
+using WaPesLeague.Data.Helpers;
 using WaPesLeague.Data.Managers.Interfaces;
 
 namespace WaPesLeague.Bot.Services
@@ -234,10 +235,14 @@ namespace WaPesLeague.Bot.Services
         private async Task<DiscordWorkflowResult> HandleSignInAsync(MixRequestDto mixRequestDto, IServiceScope scope)
         {
             var _userWorkflow = scope.ServiceProvider.GetRequiredService<IUserWorkflow>();
+            var _userMemberManager = scope.ServiceProvider.GetRequiredService<IUserMemberManager>();
             var _mixSessionWorkflow = scope.ServiceProvider.GetRequiredService<IMixSessionWorkflow>();
             var userId = await _userWorkflow.GetOrCreateUserIdByDiscordId(_mapper.Map<DiscordCommandPropsDto>(mixRequestDto.DiscordCommandProps));
 
-            var signInDto = new SignInDto(mixRequestDto.DiscordCommandProps.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, userId, mixRequestDto.Team, mixRequestDto.Position, mixRequestDto.ExtraInfo, mixRequestDto.Server.ServerId, mixRequestDto.RoleIdsPlayer1, mixRequestDto.ActorRoleIds);
+            var dbNow = DateTimeHelper.GetDatabaseNow();
+            var userMember = await _userMemberManager.GetUserMemberWithSnipersByUserIdAndServerIdAsync(userId, mixRequestDto.Server.ServerId, dbNow);
+
+            var signInDto = new SignInDto(mixRequestDto.DiscordCommandProps.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, userId, mixRequestDto.Team, mixRequestDto.Position, mixRequestDto.ExtraInfo, mixRequestDto.Server, mixRequestDto.RoleIdsPlayer1, mixRequestDto.ActorRoleIds, mixRequestDto.DiscordCommandProps.RequestedByUserId, userMember);
 
             return await _mixSessionWorkflow.SignInAsync(signInDto);
         }

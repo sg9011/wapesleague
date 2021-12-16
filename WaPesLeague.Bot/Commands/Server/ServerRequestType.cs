@@ -5,6 +5,9 @@
         GetServerButtons,
         AddServerButton,
         DeleteButton,
-        SetSniping
+        SetSniping,
+        //ToDo Add GetSnipers,
+        //ToDo Add RemoveSnipers,
+        //ToDo Add RemoveSniper,
     }
 }

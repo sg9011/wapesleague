@@ -14,6 +14,10 @@ namespace WaPesLeague.Data.Entities.Discord.Configurations
             builder.HasOne(ss => ss.Server)
                 .WithMany(s => s.ServerSnipings)
                 .HasForeignKey(ss => ss.ServerId);
+
+            builder.HasMany(ss => ss.Snipers)
+                .WithOne(s => s.InitiatedByServerSniping)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -37,6 +37,10 @@ namespace WaPesLeague.Data.Entities.Mix.Configurations
             builder.HasMany(ms => ms.UserPositionStats)
                 .WithOne(mups => mups.MixSession)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(ms => ms.Snipers)
+                .WithOne(s => s.CatchedOnMixSession)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

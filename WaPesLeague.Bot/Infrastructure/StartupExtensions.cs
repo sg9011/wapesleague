@@ -17,8 +17,9 @@ namespace WaPesLeague.Bot.Infrastructure
             services.AddSingleton<IHostedService, BotCalculateStatService>();
             services.AddSingleton<IHostedService, BotServerEventService>();
             services.AddSingleton<IHostedService, BotScanForServerMembersService>();
-            services.AddSingleton<IHostedService, ImportDailyGoogleSheetsService>();
-            services.AddSingleton<IHostedService, ProcessDailyFileImportsService>();
+            //ToDo Activate this when Doing the google sheets
+            //services.AddSingleton<IHostedService, ImportDailyGoogleSheetsService>();
+            //services.AddSingleton<IHostedService, ProcessDailyFileImportsService>();
         }
 
         public static void RegisterSettings(this IServiceCollection services, IConfiguration configuration)

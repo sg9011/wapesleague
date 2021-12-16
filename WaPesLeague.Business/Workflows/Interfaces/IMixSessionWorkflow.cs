@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WaPesLeague.Business.Dto.Mix;
 using WaPesLeague.Business.Helpers;
+using WaPesLeague.Data.Entities.Discord;
+using WaPesLeague.Data.Entities.User;
+using WaPesLeague.Data.Helpers;
 
 namespace WaPesLeague.Business.Workflows.Interfaces
 {
@@ -25,7 +28,8 @@ namespace WaPesLeague.Business.Workflows.Interfaces
         public Task<DiscordWorkflowResult> CleanRoomAsync(int serverId, ulong discordChannelId, ulong requestedBy);
         public Task<DiscordWorkflowResult> UpdatePositionAsync(ChangeMixSessionPositionDto dto);
         public Task<DiscordWorkflowResult> SwapAsync(int serverId, ulong discordChannelId, int user1Id, int user2Id, ulong requestedBy, List<string> roleIdsPlayer1, List<string> roleIdsPlayer2, List<string> actorRoleIds);
-        public Task<bool> ValidateWithinValidHours(string discordServerId, string discordChannelId, List<string> roleIds);
+        public Task<bool> ValidateWithinValidHours(MixGroupIdAndRegistrationTime mixGroupRegistrationOpening, List<string> roleIds, DateTime time);
+        public bool ValidateIsNotSnipingAgain(MixGroupIdAndRegistrationTime mixGroupRegistrationOpening, UserMember userMember, Server server, DateTime time);
 
         public Task HandleNotificationsOfMixSessionsAsync();
     }

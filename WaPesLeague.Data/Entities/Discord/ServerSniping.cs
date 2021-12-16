@@ -1,4 +1,6 @@
-﻿namespace WaPesLeague.Data.Entities.Discord
+﻿using System.Collections.Generic;
+
+namespace WaPesLeague.Data.Entities.Discord
 {
     public class ServerSniping
     {
@@ -9,5 +11,6 @@
         public int SignUpDelayDurationInHours { get; set; }
 
         public virtual Server Server { get; set; }
+        public virtual List<Sniper> Snipers { get; set; }
     }
 }

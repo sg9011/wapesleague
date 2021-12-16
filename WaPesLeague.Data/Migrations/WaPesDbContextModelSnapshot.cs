@@ -649,6 +649,39 @@ namespace WaPesLeague.Data.Migrations
                     b.ToTable("ServerTeamTags");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.Sniper", b =>
+                {
+                    b.Property<int>("SniperId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CatchedOnMixSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("InitiatedByServerSnipingId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserMemberId")
+                        .HasColumnType("int");
+
+                    b.HasKey("SniperId");
+
+                    b.HasIndex("CatchedOnMixSessionId");
+
+                    b.HasIndex("InitiatedByServerSnipingId");
+
+                    b.HasIndex("UserMemberId");
+
+                    b.ToTable("Snipers");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.FileImport.FileImport", b =>
                 {
                     b.Property<int>("FileImportId")
@@ -2827,6 +2860,33 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("Team");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.Sniper", b =>
+                {
+                    b.HasOne("WaPesLeague.Data.Entities.Mix.MixSession", "CatchedOnMixSession")
+                        .WithMany("Snipers")
+                        .HasForeignKey("CatchedOnMixSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WaPesLeague.Data.Entities.Discord.ServerSniping", "InitiatedByServerSniping")
+                        .WithMany("Snipers")
+                        .HasForeignKey("InitiatedByServerSnipingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WaPesLeague.Data.Entities.User.UserMember", "UserMember")
+                        .WithMany("Snipers")
+                        .HasForeignKey("UserMemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CatchedOnMixSession");
+
+                    b.Navigation("InitiatedByServerSniping");
+
+                    b.Navigation("UserMember");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.FileImport.FileImport", b =>
                 {
                     b.HasOne("WaPesLeague.Data.Entities.FileImport.GoogleSheetImportType", "FileImportType")
@@ -3425,6 +3485,11 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("MixTeamRoleOpenings");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerSniping", b =>
+                {
+                    b.Navigation("Snipers");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerTeam", b =>
                 {
                     b.Navigation("Tags");
@@ -3520,6 +3585,8 @@ namespace WaPesLeague.Data.Migrations
                 {
                     b.Navigation("MixTeams");
 
+                    b.Navigation("Snipers");
+
                     b.Navigation("UserPositionStats");
                 });
 
@@ -3578,6 +3645,11 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("UserMembers");
 
                     b.Navigation("UserMetadatas");
+                });
+
+            modelBuilder.Entity("WaPesLeague.Data.Entities.User.UserMember", b =>
+                {
+                    b.Navigation("Snipers");
                 });
 #pragma warning restore 612, 618
         }

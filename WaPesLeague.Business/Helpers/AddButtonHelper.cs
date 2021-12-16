@@ -12,6 +12,13 @@ namespace WaPesLeague.Business.Helpers
 
             dto.Message = options.GetValueForParams(AddServerButtonTags.MessageParam());
             dto.URL = options.GetValueForParams(AddServerButtonTags.URLParam());
+            if (dto.URL != null)
+            {
+                if (!dto.URL.StartsWith("http") && !dto.URL.StartsWith("discord"))
+                {
+                    dto.URL = $"https://{dto.URL}";
+                }
+            }
 
             dto.UseRateOverwrite = options.GetValueForParams(AddServerButtonTags.UseRateParam()).OptionStringPercentageToDecimal(null, errorMessages);
         }

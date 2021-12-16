@@ -33,13 +33,15 @@ namespace WaPesLeague.Business.Workflows
         private readonly IMixTeamManager _mixTeamManager;
         private readonly IMixTeamRoleOpeningManager _mixTeamRoleOpeningManager;
         private readonly ISniperManager _sniperManager;
+        private readonly IUserMemberManager _userMemberManager;
         
 
         private readonly Base.Bot.Bot _bot;
 
         public MixSessionWorkflow(IMixGroupRoleOpeningWorkflow mixGroupRoleOpeningWorkflow, IServerRoleWorkflow serverRoleWorkflow,
             IMixChannelManager mixChannelManager,  IMixSessionManager mixSessionManager, IMixPositionManager mixPositionManager, IMixPositionReservationManager mixPositionReservationManager,
-            IPositionManager positionManager, IMixTeamManager mixTeamManager, IMixTeamRoleOpeningManager mixTeamRoleOpeningManager, ISniperManager sniperManager, Base.Bot.Bot bot,
+            IPositionManager positionManager, IMixTeamManager mixTeamManager, IMixTeamRoleOpeningManager mixTeamRoleOpeningManager, ISniperManager sniperManager, IUserMemberManager userMemberManager,
+            Base.Bot.Bot bot,
             IMemoryCache cache, IMapper mapper, ILogger<MixSessionWorkflow> logger, ErrorMessages errorMessages, GeneralMessages generalMessages)
             : base(cache, mapper, logger, errorMessages, generalMessages)
         {
@@ -53,6 +55,7 @@ namespace WaPesLeague.Business.Workflows
             _mixTeamManager = mixTeamManager;
             _mixTeamRoleOpeningManager = mixTeamRoleOpeningManager;
             _sniperManager = sniperManager;
+            _userMemberManager = userMemberManager;
 
             _bot = bot;
         }   
@@ -117,7 +120,7 @@ namespace WaPesLeague.Business.Workflows
 
         public async Task<DiscordWorkflowResult> SignInAsync(SignInDto dto)
         {
-            var validator = new SignInDtoValidator(_mixChannelManager, this, _mixSessionManager, ErrorMessages, GeneralMessages);
+            var validator = new SignInDtoValidator(_mixChannelManager, this, _mixSessionManager, _mixPositionReservationManager, ErrorMessages, GeneralMessages);
             var validationResults = await validator.ValidateAsync(dto);
             if (validationResults.Errors.Any())
                 return HandleValidationResults(validationResults);
@@ -553,11 +556,11 @@ namespace WaPesLeague.Business.Workflows
 
             return new DiscordWorkflowResult(GeneralMessages.AppliedChanges.GetValueForLanguage(), true);
         }
-        public async Task<DiscordWorkflowResult> SwapAsync(int serverId, ulong discordChannelId, int user1Id, int user2Id, ulong requestedBy, List<string> roleIdsPlayer1, List<string> roleIdsPlayer2, List<string> actorRoleIds)
+        public async Task<DiscordWorkflowResult> SwapAsync(Server server, ulong discordChannelId, int user1Id, int user2Id, ulong requestedBy, List<string> roleIdsPlayer1, List<string> roleIdsPlayer2, List<string> actorRoleIds)
         {
             var time = DateTimeHelper.GetDatabaseNow();
             var notifyRequests = new List<NotifyRequest>();
-            var activeMixSession = await _mixSessionManager.GetActiveMixSessionByServerIdAndDiscordChannelIdAsync(serverId, discordChannelId.ToString());
+            var activeMixSession = await _mixSessionManager.GetActiveMixSessionByServerIdAndDiscordChannelIdAsync(server.ServerId, discordChannelId.ToString());
             if (activeMixSession == null)
                 return new DiscordWorkflowResult(ErrorMessages.NoActiveSessionFoundInChannel.GetValueForLanguage(), false);
 
@@ -594,6 +597,17 @@ namespace WaPesLeague.Business.Workflows
                 var userIdToSignIn = player1Reservation == null
                     ? user1Id
                     : user2Id;
+
+                var userMemberOfPlayerToSignIn = await _userMemberManager.GetUserMemberWithSnipersByUserIdAndServerIdAsync(userIdToSignIn, server.ServerId, time);
+                if (!ValidateIsNotSnipingAgain(mixGroupRegistrationOpening, userMemberOfPlayerToSignIn, server, time))
+                {
+                    var errorMessage = string.Format(ErrorMessages.NotSnipingAgain.GetValueForLanguage()
+                        , DateTimeHelper.ConvertDateTimeToApplicationTimeZone(userMemberOfPlayerToSignIn.Snipers.First().DateEnd, server.TimeZoneName).ToString("ddd, dd MMM HH:mm")
+                        , server.ServerSnipings.First().IntervalAfterRegistrationOpeningInMinutes
+                        , server.ServerSnipings.First().SignUpDelayInMinutes);
+                    return new DiscordWorkflowResult(errorMessage, false);
+                }
+
                 await HandleSignOutAsync(reservationToSignOut, activeMixSession, DateTimeHelper.GetDatabaseNow(), true);
 
                 var mixPostionReservation = new MixPositionReservation()

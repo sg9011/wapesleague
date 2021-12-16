@@ -15,6 +15,7 @@ namespace WaPesLeague.Business.Dto.Mix
         private readonly IMixChannelManager _mixChannelManager;
         private readonly IMixSessionWorkflow _mixSessionWorkflow;
         private readonly IMixSessionManager _mixSessionManager;
+        private readonly IMixPositionReservationManager _mixPositionReservationManager;
         private readonly ErrorMessages ErrorMessages;
         private readonly GeneralMessages GeneralMessages;
 
@@ -23,12 +24,13 @@ namespace WaPesLeague.Business.Dto.Mix
         private bool withinValidHours { get; set; }
         private MixGroupIdAndRegistrationTime mixGroupIdAndRegistrationTime { get; set; }
 
-        public SignInDtoValidator(IMixChannelManager mixChannelManager, IMixSessionWorkflow mixSessionWorkflow, IMixSessionManager mixSessionManager,ErrorMessages errorMessages, GeneralMessages generalMessages)
+        public SignInDtoValidator(IMixChannelManager mixChannelManager, IMixSessionWorkflow mixSessionWorkflow, IMixSessionManager mixSessionManager, IMixPositionReservationManager mixPositionReservationManager, ErrorMessages errorMessages, GeneralMessages generalMessages)
         {
             CascadeMode = CascadeMode.Stop;
             _mixChannelManager = mixChannelManager;
             _mixSessionWorkflow = mixSessionWorkflow;
             _mixSessionManager = mixSessionManager;
+            _mixPositionReservationManager = mixPositionReservationManager;
             ErrorMessages = errorMessages;
             GeneralMessages = generalMessages;
             
@@ -54,7 +56,7 @@ namespace WaPesLeague.Business.Dto.Mix
                 .MustAsync(NotSnipingAgain)
                 .WithMessage(z => 
                     string.Format(ErrorMessages.NotSnipingAgain.GetValueForLanguage()
-                        , DateTimeHelper.ConvertDateTimeToApplicationTimeZone(z.UserMember.Snipers.First().DateEnd, z.Server.TimeZoneName).ToString()
+                        , DateTimeHelper.ConvertDateTimeToApplicationTimeZone(z.UserMember.Snipers.First().DateEnd, z.Server.TimeZoneName).ToString("ddd, dd MMM HH:mm")
                         , z.Server.ServerSnipings.First().IntervalAfterRegistrationOpeningInMinutes
                         , z.Server.ServerSnipings.First().SignUpDelayInMinutes)
                     );
@@ -83,7 +85,10 @@ namespace WaPesLeague.Business.Dto.Mix
         private async Task<bool> NotSnipingAgain(SignInDto dto, CancellationToken cancellationToken)
         {
             mixGroupIdAndRegistrationTime ??= await _mixSessionManager.HasOpenMixSessionByDiscordIds(dto.DiscordServerId.ToString(), dto.DiscordChannelId.ToString(), dto.DbSignInTime);
-            return !withinValidHours || _mixSessionWorkflow.ValidateIsNotSnipingAgain(mixGroupIdAndRegistrationTime, dto.UserMember, dto.Server, dto.DbSignInTime);
+            return !withinValidHours ||
+                (_mixSessionWorkflow.ValidateIsNotSnipingAgain(mixGroupIdAndRegistrationTime, dto.UserMember, dto.Server, dto.DbSignInTime)
+                    || ((await _mixPositionReservationManager.GetActiveMixPositionReservationByServerIdAndDiscordChannelIdAndUserIdAsync(dto.Server.ServerId, dto.DiscordChannelId.ToString(), dto.UserId)) != null)
+                );
         }
     }
 }

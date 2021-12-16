@@ -32,14 +32,12 @@ namespace WaPesLeague.Data.Migrations
                         name: "FK_Snipers_ServerSnipings_InitiatedByServerSnipingId",
                         column: x => x.InitiatedByServerSnipingId,
                         principalTable: "ServerSnipings",
-                        principalColumn: "ServerSnipingId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ServerSnipingId");
                     table.ForeignKey(
                         name: "FK_Snipers_UserMembers_UserMemberId",
                         column: x => x.UserMemberId,
                         principalTable: "UserMembers",
-                        principalColumn: "UserMemberId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "UserMemberId");
                 });
 
             migrationBuilder.CreateIndex(

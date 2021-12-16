@@ -80,6 +80,8 @@ namespace WaPesLeague.Business.Workflows
 
             await _serverButtonManager.AddAsync(serverButton);
 
+            await _serverWorkflow.UpdateServerCacheValueAsync(ulong.Parse(server.DiscordServerId));
+
             return new DiscordWorkflowResult(GeneralMessages.AppliedChanges.GetValueForLanguage(), true);
         }
 
@@ -105,16 +107,18 @@ namespace WaPesLeague.Business.Workflows
             var databaseNow = DateTimeHelper.GetDatabaseNow();
             var dbServer = await _serverManager.GetServerByDiscordIdAsync(server.DiscordServerId);
             var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("\n");
             var hasValue = false;
             foreach (var buttonGroup in dbServer.ButtonGroups.Where(bg => bg.Buttons.Any(b => (!b.ShowFrom.HasValue || b.ShowFrom.Value < databaseNow) && (!b.ShowUntil.HasValue || b.ShowUntil.Value > databaseNow))))
             {
                 hasValue = true;
-                var formattedPercantage = Math.Round(buttonGroup.UseRate * 100, 2);
+                var formattedPercantage = Math.Round(buttonGroup.UseRate, 2);
+                
                 stringBuilder.AppendLine(string.Format(GeneralMessages.ServerButtonGroupInfoString.GetValueForLanguage(), buttonGroup.ButtonGroupType.ToString(), $"{formattedPercantage}%"));
                 
                 foreach (var button in buttonGroup.Buttons.Where(b => (b.ShowFrom == null || b.ShowFrom.Value < databaseNow) && (b.ShowUntil == null || b.ShowUntil.Value > databaseNow)))
                 {
-                    stringBuilder.AppendLine($"/t{string.Format(GeneralMessages.ServerButtonInfoString.GetValueForLanguage(), button.ServerButtonId, button.Message, button.URL)}");
+                    stringBuilder.AppendLine($"{string.Format(GeneralMessages.ServerButtonInfoString.GetValueForLanguage(), button.ServerButtonId, button.Message, button.URL)}");
                 }
                 stringBuilder.AppendLine(Bot.DoubleLine);
                 stringBuilder.AppendLine();
@@ -126,7 +130,7 @@ namespace WaPesLeague.Business.Workflows
                 stringBuilder.AppendLine(GeneralMessages.NoButtonsConfiguredOnServer.GetValueForLanguage());
             }
 
-            return new DiscordWorkflowResult(stringBuilder.ToString(), true);
+            return new DiscordWorkflowResult(String.Format(stringBuilder.ToString()), true);
         }
     }
 }

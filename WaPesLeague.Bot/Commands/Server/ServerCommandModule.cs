@@ -165,7 +165,7 @@ namespace WaPesLeague.Bot.Commands.Server
                     return;
 
                 var discordCommandProperties = new DiscordCommandProperties(ctx);
-                ServerRequestQueue.Queue.Enqueue(new ServerRequestDto(ServerRequestType.GetServerButtons, discordCommandProperties, server)
+                ServerRequestQueue.Queue.Enqueue(new ServerRequestDto(ServerRequestType.AddServerButton, discordCommandProperties, server)
                 {
                     Options = options
                 });

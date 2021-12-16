@@ -10,6 +10,7 @@ namespace WaPesLeague.Data.Entities.Discord.Configurations
             builder.Property(ss => ss.IntervalAfterRegistrationOpeningInMinutes).IsRequired(true);
             builder.Property(ss => ss.SignUpDelayInMinutes).IsRequired(true);
             builder.Property(ss => ss.SignUpDelayDurationInHours).IsRequired(true);
+            builder.Property(ss => ss.Enabled).IsRequired(true);
 
             builder.HasOne(ss => ss.Server)
                 .WithMany(s => s.ServerSnipings)
@@ -17,7 +18,7 @@ namespace WaPesLeague.Data.Entities.Discord.Configurations
 
             builder.HasMany(ss => ss.Snipers)
                 .WithOne(s => s.InitiatedByServerSniping)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

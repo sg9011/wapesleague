@@ -27,7 +27,7 @@ namespace WaPesLeague.Business.Workflows.Interfaces
 
         public Task<DiscordWorkflowResult> CleanRoomAsync(int serverId, ulong discordChannelId, ulong requestedBy);
         public Task<DiscordWorkflowResult> UpdatePositionAsync(ChangeMixSessionPositionDto dto);
-        public Task<DiscordWorkflowResult> SwapAsync(int serverId, ulong discordChannelId, int user1Id, int user2Id, ulong requestedBy, List<string> roleIdsPlayer1, List<string> roleIdsPlayer2, List<string> actorRoleIds);
+        public Task<DiscordWorkflowResult> SwapAsync(Server server, ulong discordChannelId, int user1Id, int user2Id, ulong requestedBy, List<string> roleIdsPlayer1, List<string> roleIdsPlayer2, List<string> actorRoleIds);
         public Task<bool> ValidateWithinValidHours(MixGroupIdAndRegistrationTime mixGroupRegistrationOpening, List<string> roleIds, DateTime time);
         public bool ValidateIsNotSnipingAgain(MixGroupIdAndRegistrationTime mixGroupRegistrationOpening, UserMember userMember, Server server, DateTime time);
 

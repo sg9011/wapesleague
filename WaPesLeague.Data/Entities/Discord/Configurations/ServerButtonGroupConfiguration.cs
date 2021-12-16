@@ -9,7 +9,7 @@ namespace WaPesLeague.Data.Entities.Discord.Configurations
         public void Configure(EntityTypeBuilder<ServerButtonGroup> builder)
         {
             builder.Property(bg => bg.UseRate).IsRequired(true).HasPrecision(18, 8);
-            builder.Property(gs => gs.ButtonGroupType).HasMaxLength(100).HasConversion<string>().HasDefaultValue(ButtonGroupType.ShowAllAtTheSameTime);
+            builder.Property(gs => gs.ButtonGroupType).HasMaxLength(100).HasConversion<string>().HasDefaultValue(ButtonGroupType.ShowOneOutOfList);
 
             builder.HasMany(bg => bg.Buttons)
                 .WithOne(b => b.ButtonGroup)

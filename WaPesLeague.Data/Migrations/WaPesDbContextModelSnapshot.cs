@@ -488,7 +488,7 @@ namespace WaPesLeague.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
-                        .HasDefaultValue("ShowAllAtTheSameTime");
+                        .HasDefaultValue("ShowOneOutOfList");
 
                     b.Property<int>("ServerId")
                         .HasColumnType("int");
@@ -582,6 +582,9 @@ namespace WaPesLeague.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("bit");
 
                     b.Property<int>("IntervalAfterRegistrationOpeningInMinutes")
                         .HasColumnType("int");
@@ -2871,13 +2874,13 @@ namespace WaPesLeague.Data.Migrations
                     b.HasOne("WaPesLeague.Data.Entities.Discord.ServerSniping", "InitiatedByServerSniping")
                         .WithMany("Snipers")
                         .HasForeignKey("InitiatedByServerSnipingId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("WaPesLeague.Data.Entities.User.UserMember", "UserMember")
                         .WithMany("Snipers")
                         .HasForeignKey("UserMemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("CatchedOnMixSession");

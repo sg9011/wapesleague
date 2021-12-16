@@ -359,6 +359,8 @@ namespace WaPesLeague.Business.Workflows
             {
                 await _serverSnipingManager.AddAsync(new ServerSniping()
                 {
+                    ServerId = server.ServerId,
+                    Enabled = true,
                     IntervalAfterRegistrationOpeningInMinutes = intervalAfterRegistrationOpeningInMinutes,
                     SignUpDelayInMinutes = signUpDelayInMinutes,
                     SignUpDelayDurationInHours = signUpDelayDurationInHours
@@ -368,17 +370,22 @@ namespace WaPesLeague.Business.Workflows
 
             if (currentServerSniping != null && hasDeleteValues)
             {
-                await _serverSnipingManager.DeleteAsync(currentServerSniping.ServerSnipingId);
+                //Delete ServerSnipings Related to this one
+                await _serverSnipingManager.DeActivateAsync(currentServerSniping.ServerSnipingId);
                 changesMade = true;
             }
 
             if (currentServerSniping != null && hasCorrectValues)
             {
-                var copiedServerSniping = Mapper.Map<ServerSniping>(currentServerSniping);
-                copiedServerSniping.IntervalAfterRegistrationOpeningInMinutes = intervalAfterRegistrationOpeningInMinutes;
-                copiedServerSniping.SignUpDelayInMinutes = signUpDelayInMinutes;
-                copiedServerSniping.SignUpDelayDurationInHours = signUpDelayDurationInHours;
-                await _serverSnipingManager.UpdateAsync(copiedServerSniping);
+                await _serverSnipingManager.DeActivateAsync(currentServerSniping.ServerSnipingId);
+                await _serverSnipingManager.AddAsync(new ServerSniping()
+                {
+                    ServerId = server.ServerId,
+                    Enabled = true,
+                    IntervalAfterRegistrationOpeningInMinutes = intervalAfterRegistrationOpeningInMinutes,
+                    SignUpDelayInMinutes = signUpDelayInMinutes,
+                    SignUpDelayDurationInHours = signUpDelayDurationInHours
+                });
                 changesMade = true;
             }
 

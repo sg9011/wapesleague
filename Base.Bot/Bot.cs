@@ -75,8 +75,8 @@ namespace Base.Bot
 
             while (!_cts.IsCancellationRequested)
             {
-                _logger.LogInformation("We are in the 10 second While Loop OLE!!");
-                await Task.Delay(TimeSpan.FromSeconds(10));
+                _logger.LogInformation("We are in the 30 second While Loop OLE!!");
+                await Task.Delay(TimeSpan.FromSeconds(30));
             }
             _logger.LogCritical("The Bot.cs class reached the last line of the class");
 

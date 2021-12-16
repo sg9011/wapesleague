@@ -34,7 +34,7 @@ namespace WaPesLeague.Data.Managers
                 .Include(s => s.ServerEvents)
                 .Include(s => s.ButtonGroups)
                     .ThenInclude(bg => bg.Buttons)
-                .Include(s => s.ServerSnipings)
+                .Include(s => s.ServerSnipings.Where(ss => ss.Enabled == true))
                 .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.DiscordServerId == discordServerId && s.IsActive == true);
         }

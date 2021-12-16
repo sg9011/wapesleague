@@ -31,12 +31,12 @@ namespace WaPesLeague.Data.Managers
             return currentServerSniping;
         }
 
-        public async Task DeleteAsync(int serverSnipingId)
+        public async Task DeActivateAsync(int serverSnipingId)
         {
             var currentServerSniping = await _context.ServerSnipings.FindAsync(serverSnipingId);
             if (currentServerSniping != null)
             {
-                _context.ServerSnipings.Remove(currentServerSniping);
+                currentServerSniping.Enabled = false;
                 await _context.SaveChangesAsync();
             }
         }

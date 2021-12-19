@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using WaPesLeague.Constants.Resources;
 using WaPesLeague.Constants;
 using System.Collections.Generic;
+using WaPesLeague.Bot.Helpers;
 
 namespace WaPesLeague.Bot.Commands.Mix
 {
@@ -229,6 +230,7 @@ namespace WaPesLeague.Bot.Commands.Mix
             }
         }
 
+        //No Queue
         [Command("Sides"), Aliases("CurrentSides", "ShowSides", "Side", "Lados", "Veja", "Demonstrar", "Kant", "WhereDoWeGo")]
         [Description("Display the side selection")]
         public async Task Sides(CommandContext ctx, [RemainingText] string textToIgnore = null)
@@ -252,21 +254,21 @@ namespace WaPesLeague.Bot.Commands.Mix
             }
         }
 
+        //No Queue
         [Command("MyStats"), Aliases("MixStats", "Estatísticas", "Estatisticas", "MisEstadísticas")]
         [Description("Get advanced stats for mix")]
         public async Task AdvancedStats(CommandContext ctx, [RemainingText] string textToIgnore = null)
         {
             try
             {
-                int? serverId = null;
+                Data.Entities.Discord.Server server = null;
                 if (ctx.Guild != null)
                 {
-                    var server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
-                    serverId = server.ServerId;
+                    server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
                 }
 
                 var discordCommandProperties = new DiscordCommandProperties(ctx);
-                await HandleAdvancedStats(ctx, discordCommandProperties, serverId);
+                await HandleAdvancedStats(ctx, discordCommandProperties, server);
             }
             catch (Exception ex)
             {
@@ -275,24 +277,24 @@ namespace WaPesLeague.Bot.Commands.Mix
             }
         }
 
+        //No Queue
         [Command("UserStats"), Aliases("UserMixStats", "PlayerMixStats", "PlayerStats")]
         [Description("Get advanced user stats for mix")]
         public async Task UserAdvancedStats(CommandContext ctx, [Description("The discord member")] DiscordMember userMention, [RemainingText] string textToIgnore = null)
         {
             try
             {
-                int? serverId = null;
+                Data.Entities.Discord.Server server = null;
                 if (ctx.Guild != null)
                 {
-                    var server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
-                    serverId = server.ServerId;
+                    server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
                 }
 
                 if (!await ValidateHasAdvancedRolesAsync(ctx))
                     return;
 
                 var discordCommandProperties = new DiscordCommandProperties(ctx, userMention);
-                await HandleAdvancedStats(ctx, discordCommandProperties, serverId);
+                await HandleAdvancedStats(ctx, discordCommandProperties, server);
                 
             }
             catch (Exception ex)
@@ -302,11 +304,11 @@ namespace WaPesLeague.Bot.Commands.Mix
             }
         }
 
-        private async Task HandleAdvancedStats(CommandContext ctx, DiscordCommandProperties discordCommandProperties, int? serverId)
+        private async Task HandleAdvancedStats(CommandContext ctx, DiscordCommandProperties discordCommandProperties, Data.Entities.Discord.Server server)
         {
             var discordPropsDto = _mapper.Map<DiscordCommandPropsDto>(discordCommandProperties);
             var userId = await _userWorkflow.GetOrCreateUserIdByDiscordId(discordPropsDto);
-            var result = await _mixStatsWorkflow.GetUserAdvancedStats(userId, serverId);
+            var result = await _mixStatsWorkflow.GetUserAdvancedStats(userId, server?.ServerId);
             var embed = new DiscordEmbedBuilder()
             {
                 Color = DiscordColor.Gold,
@@ -327,12 +329,10 @@ namespace WaPesLeague.Bot.Commands.Mix
                 Text = "Ask visualcomplexity for more info!"
 
             };
-            var button = new DiscordLinkButtonComponent("https://www.wapesleague.com/home/wapes-needs-you", "WaPes Needs You!");
 
             var message = new DiscordMessageBuilder();
             message.AddEmbed(embed);
-            message.AddComponents(button);
-            
+            message.AddDiscordLinkButtonsToMessageIfNeeded(server, new Random());
             
             await ctx.RespondAsync(message);
         }

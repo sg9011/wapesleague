@@ -10,6 +10,7 @@ namespace Base.Bot.Commands
         public ulong UserId { get; set; }
         public string UserName { get; set; }
         public string NickName { get; set; }
+        public string DiscordDiscriminator { get; set; }
         public DateTime DiscordJoin { get; set; }
         public DateTime? ServerJoin { get; set; }
         public string Mention { get; set; }
@@ -28,6 +29,7 @@ namespace Base.Bot.Commands
             NickName = ctx.Member?.Nickname ?? ctx.Member?.Username ?? ctx.User.Username;
             Mention = ctx.Member?.Mention ?? ctx.User.Mention;
 
+            DiscordDiscriminator = ctx.Member?.Discriminator ?? ctx.User.Discriminator;
             ServerJoin = ctx.Member?.JoinedAt.UtcDateTime ?? ctx.User.CreationTimestamp.UtcDateTime;
             DiscordJoin = ctx.User.CreationTimestamp.UtcDateTime;
 
@@ -49,6 +51,7 @@ namespace Base.Bot.Commands
             NickName = discordMember?.Nickname ?? discordMember?.Username;
             Mention = discordMember?.Mention;
 
+            DiscordDiscriminator = discordMember?.Discriminator;
             ServerJoin = discordMember.JoinedAt.UtcDateTime;
             DiscordJoin = discordMember.CreationTimestamp.UtcDateTime;
 
@@ -59,6 +62,28 @@ namespace Base.Bot.Commands
             ChannelName = ctx.Channel.Name;
 
             MessageId = ctx.Message.Id;
+        }
+
+        public DiscordCommandProperties(DiscordMember discordMember, ulong botUserId)
+        {
+            RequestedByUserId = botUserId;
+            UserId = discordMember.Id;
+            UserName = discordMember.Username;
+
+            NickName = discordMember?.Nickname ?? discordMember?.Username;
+            Mention = discordMember?.Mention;
+
+            DiscordDiscriminator = discordMember?.Discriminator;
+            ServerJoin = discordMember.JoinedAt.UtcDateTime;
+            DiscordJoin = discordMember.CreationTimestamp.UtcDateTime;
+
+            ServerId = discordMember.Guild.Id;
+            ServerName = discordMember.Guild.Name;
+
+            ChannelId = 0;
+            ChannelName = string.Empty;
+
+            MessageId = 0;
         }
     }
 }

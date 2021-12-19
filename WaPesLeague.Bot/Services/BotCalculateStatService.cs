@@ -25,7 +25,7 @@ namespace WaPesLeague.Bot.Services
             await Task.Delay(120000); //2min
             while (!stoppingToken.IsCancellationRequested)
             {
-                var nowAtStartOfExecution = DateTime.Now;
+                var nowAtStartOfExecution = DateTime.UtcNow;
                 try
                 {
                     using (var scope = _provider.CreateScope())

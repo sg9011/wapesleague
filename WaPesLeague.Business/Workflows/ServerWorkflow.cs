@@ -25,10 +25,11 @@ namespace WaPesLeague.Business.Workflows
         private readonly IFormationManager _formationManager;
         private readonly IMixUserPositionSessionStatManager _mixUserPositionSessionStatManager;
         private readonly IUserMemberManager _userMemberManager;
+        private readonly IServerSnipingManager _serverSnipingManager;
         private readonly Base.Bot.Bot _bot;
         private readonly DefaultServerSettings _defaultServerSettings;
 
-        public ServerWorkflow(IServerManager serverManager, IServerTeamManager serverTeamManager, IFormationManager formationManager, IMixUserPositionSessionStatManager mixUserPositionSessionStatManager, IUserMemberManager userMemberManager,
+        public ServerWorkflow(IServerManager serverManager, IServerTeamManager serverTeamManager, IFormationManager formationManager, IMixUserPositionSessionStatManager mixUserPositionSessionStatManager, IUserMemberManager userMemberManager, IServerSnipingManager serverSnipingManager,
             Base.Bot.Bot bot, DefaultServerSettings defaultServerSettings, IMemoryCache cache, IMapper mapper, ILogger<ServerWorkflow> logger
             , ErrorMessages errorMessages, GeneralMessages generalMessages)
             : base (cache, mapper, logger, errorMessages, generalMessages)
@@ -38,6 +39,7 @@ namespace WaPesLeague.Business.Workflows
             _formationManager = formationManager;
             _mixUserPositionSessionStatManager = mixUserPositionSessionStatManager;
             _userMemberManager = userMemberManager;
+            _serverSnipingManager = serverSnipingManager;
             _bot = bot;
             _defaultServerSettings = defaultServerSettings;
         }
@@ -128,6 +130,12 @@ namespace WaPesLeague.Business.Workflows
             var servers = await _serverManager.GetServersAsync();
             await HandlePlayedAmountOfSessionEventsAsync(servers); //When more events are added return some values so they can be reused in other methods aswell (DiscordClient for example etc)
             
+        }
+
+        public async Task UpdateServerCacheValueAsync(ulong discordServerId)
+        {
+            var cacheEntry = await _serverManager.GetServerByDiscordIdAsync(discordServerId.ToString());
+            MemoryCache.Set(Cache.GetServerId(discordServerId).ToUpperInvariant(), cacheEntry, TimeSpan.FromMinutes(1430));
         }
 
         private async Task UpdateServerTeamIfNeededAsync(ServerTeam team, string name, bool isOpen)
@@ -332,6 +340,61 @@ namespace WaPesLeague.Business.Workflows
             }
 
             return dict;
+        }
+
+        public async Task<DiscordWorkflowResult> SetSnipingAsync(Server server, int intervalAfterRegistrationOpeningInMinutes, int signUpDelayInMinutes, int signUpDelayDurationInHours)
+        {
+            var currentServerSniping = server.ServerSnipings.FirstOrDefault();
+
+            var hasCorrectValues = intervalAfterRegistrationOpeningInMinutes != 0 && signUpDelayInMinutes != 0 && signUpDelayDurationInHours != 0;
+            var hasDeleteValues = intervalAfterRegistrationOpeningInMinutes == 0 && signUpDelayInMinutes == 0 && signUpDelayDurationInHours == 0;
+
+            if (!hasCorrectValues && !hasDeleteValues)
+            {
+                return new DiscordWorkflowResult(ErrorMessages.InvalidSnipingValues.GetValueForLanguage(), false);
+            }
+
+            var changesMade = false;
+            if (currentServerSniping == null && hasCorrectValues)
+            {
+                await _serverSnipingManager.AddAsync(new ServerSniping()
+                {
+                    ServerId = server.ServerId,
+                    Enabled = true,
+                    IntervalAfterRegistrationOpeningInMinutes = intervalAfterRegistrationOpeningInMinutes,
+                    SignUpDelayInMinutes = signUpDelayInMinutes,
+                    SignUpDelayDurationInHours = signUpDelayDurationInHours
+                });
+                changesMade = true;
+            }
+
+            if (currentServerSniping != null && hasDeleteValues)
+            {
+                //Delete ServerSnipings Related to this one
+                await _serverSnipingManager.DeActivateAsync(currentServerSniping.ServerSnipingId);
+                changesMade = true;
+            }
+
+            if (currentServerSniping != null && hasCorrectValues)
+            {
+                await _serverSnipingManager.DeActivateAsync(currentServerSniping.ServerSnipingId);
+                await _serverSnipingManager.AddAsync(new ServerSniping()
+                {
+                    ServerId = server.ServerId,
+                    Enabled = true,
+                    IntervalAfterRegistrationOpeningInMinutes = intervalAfterRegistrationOpeningInMinutes,
+                    SignUpDelayInMinutes = signUpDelayInMinutes,
+                    SignUpDelayDurationInHours = signUpDelayDurationInHours
+                });
+                changesMade = true;
+            }
+
+            if (changesMade)
+            {
+                await UpdateServerCacheValueAsync(ulong.Parse(server.DiscordServerId));
+            }
+
+            return new DiscordWorkflowResult(string.Format(GeneralMessages.SnipingValuesSet.GetValueForLanguage(), intervalAfterRegistrationOpeningInMinutes, signUpDelayInMinutes, signUpDelayDurationInHours), true);
         }
     }
 }

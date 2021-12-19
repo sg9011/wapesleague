@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WaPesLeague.Data.Entities.Discord;
 using WaPesLeague.Data.Managers.Interfaces;
@@ -21,6 +22,21 @@ namespace WaPesLeague.Data.Managers
             return serverRole;
         }
 
+        public async Task<List<ServerRole>> AddMultipleAsync(List<ServerRole> serverRoles)
+        {
+            await _context.ServerRoles.AddRangeAsync(serverRoles);
+            await _context.SaveChangesAsync();
+
+            return serverRoles;
+        }
+
+        public async Task<List<ServerRole>> GetAllAsync()
+        {
+            return await _context.ServerRoles
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
         public async Task<ServerRole> GetServerRoleByDiscordRoleIdAndServerIdAsync(string discordRoleId, int serverId)
         {
             return await _context.ServerRoles
@@ -38,6 +54,14 @@ namespace WaPesLeague.Data.Managers
                 await _context.SaveChangesAsync();
             }
             return currentServerRole;
+        }
+
+        public async Task<List<ServerRole>> UpdateMultipleAsync(List<ServerRole> serverRolesToUpdate)
+        {
+            _context.ServerRoles.UpdateRange(serverRolesToUpdate);
+            await _context.SaveChangesAsync();
+
+            return serverRolesToUpdate;
         }
     }
 }

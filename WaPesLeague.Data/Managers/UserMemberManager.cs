@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,6 +30,21 @@ namespace WaPesLeague.Data.Managers
                 .FirstOrDefaultAsync(um => um.DiscordUserId == discordUserId))?.UserId;
         }
 
+        public async Task<UserMember> GetUserMemberWithSnipersByUserIdAndServerIdAsync(int userId, int serverId, DateTime date)
+        {
+            return await _context.UserMembers
+                .Include(um => um.Snipers.Where(s => s.DateEnd > date))
+                .AsNoTracking()
+                .FirstOrDefaultAsync(um => um.UserId == userId && um.ServerId == serverId);
+        }
+
+        public async Task<int?> GetUserMemberIdByUserIdAndServerIdAsync(int userId, int serverId)
+        {
+            return (await _context.UserMembers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(um => um.UserId == userId && um.ServerId == serverId))?.UserMemberId;
+        }
+
         public async Task<UserMember> AddAsync(UserMember userMember)
         {
             await _context.UserMembers.AddAsync(userMember);
@@ -36,6 +52,15 @@ namespace WaPesLeague.Data.Managers
 
             return userMember;
         }
+
+        public async Task<List<UserMember>> AddMultipleAsync(List<UserMember> userMembers)
+        {
+            await _context.UserMembers.AddRangeAsync(userMembers);
+            await _context.SaveChangesAsync();
+
+            return userMembers;
+        }
+
 
         public async Task<UserMember> UpdateAsync(UserMember userMember)
         {

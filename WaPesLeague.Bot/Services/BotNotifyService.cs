@@ -23,7 +23,7 @@ namespace WaPesLeague.Bot.Services
             stoppingToken.Register(() => Logger.LogDebug("BotNotifyService background service Register Call."));
             while (!stoppingToken.IsCancellationRequested)
             {
-                var nowAtStartOfExecution = DateTime.Now;
+                var nowAtStartOfExecution = DateTime.UtcNow;
                 try
                 {
                     using (var scope = _provider.CreateScope())

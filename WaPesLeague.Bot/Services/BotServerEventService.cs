@@ -22,10 +22,10 @@ namespace WaPesLeague.Bot.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             stoppingToken.Register(() => Logger.LogDebug("BotServerEventService background service Register Call."));
-            //await Task.Delay(720000); //12min
+            await Task.Delay(720000); //12min
             while (!stoppingToken.IsCancellationRequested)
             {
-                var nowAtStartOfExecution = DateTime.Now;
+                var nowAtStartOfExecution = DateTime.UtcNow;
                 try
                 {
                     using (var scope = _provider.CreateScope())

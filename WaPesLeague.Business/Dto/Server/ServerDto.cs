@@ -4,6 +4,7 @@ using System.Text;
 using WaPesLeague.Business.Helpers;
 using WaPesLeague.Constants;
 using WaPesLeague.Constants.Resources;
+using WaPesLeague.Data.Entities.Discord;
 using WaPesLeague.Data.Helpers;
 
 namespace WaPesLeague.Business.Dto.Server
@@ -34,6 +35,7 @@ namespace WaPesLeague.Business.Dto.Server
         public string Language { get; set; }
         public bool AllowActiveSwapCommand { get; set; }
         public bool AllowInactiveSwapCommand { get; set; }
+        public ServerSniping ServerSniping{ get; set; }
 
         public string ToDiscordString(GeneralMessages generalMessages)
         {
@@ -43,6 +45,7 @@ namespace WaPesLeague.Business.Dto.Server
                 stringBuilder.Append(team.ToDiscordString(generalMessages));
             }
             var defaulSessionPassword = string.IsNullOrWhiteSpace(DefaultSessionPassword) ? generalMessages.NoValueDefined.GetValueForLanguage() : DefaultSessionPassword;
+            
             return string.Format(generalMessages.ServerInfo.GetValueForLanguage(),
                 ServerName,DefaultStartTime.ToDiscordString(),
                 DefaultHoursToOpenRegistrationBeforeStart.ToDiscordString(),
@@ -62,7 +65,8 @@ namespace WaPesLeague.Business.Dto.Server
                 stringBuilder,
                 TimeZoneName,
                 Language,
-                Bot.Prefix);
+                Bot.Prefix,
+                ServerSniping?.IntervalAfterRegistrationOpeningInMinutes ?? 0, ServerSniping?.SignUpDelayInMinutes ?? 0, ServerSniping?.SignUpDelayDurationInHours ?? 0);
         }
     }
 

@@ -14,6 +14,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WaPesLeague.Bot.Commands.Mix;
+using WaPesLeague.Bot.Commands.Server;
+using WaPesLeague.Bot.Helpers;
 using WaPesLeague.Business.Dto;
 using WaPesLeague.Business.Dto.Mix;
 using WaPesLeague.Business.Helpers;
@@ -21,6 +23,7 @@ using WaPesLeague.Business.Workflows.Interfaces;
 using WaPesLeague.Constants;
 using WaPesLeague.Constants.Resources;
 using WaPesLeague.Data.Entities.Discord.Enums;
+using WaPesLeague.Data.Helpers;
 using WaPesLeague.Data.Managers.Interfaces;
 
 namespace WaPesLeague.Bot.Services
@@ -30,17 +33,19 @@ namespace WaPesLeague.Bot.Services
         private readonly IServiceProvider _provider;
         private readonly IMapper _mapper;
         private readonly GeneralMessages GeneralMessages;
+        private readonly ErrorMessages ErrorMessages;
         private static int _serverNotifyExceptionCounter = 0;
         private static int _unauthorizedNotifyExceptionCounter = 0;
         private static int _otherNotifyExceptionCounter = 0;
 
         private const int delayMilliSeconds = 500;
-        public RequestService(ILogger<RequestService> logger, IServiceProvider serviceProvider, IMapper mapper, GeneralMessages generalMessages)
+        public RequestService(ILogger<RequestService> logger, IServiceProvider serviceProvider, IMapper mapper, GeneralMessages generalMessages, ErrorMessages errorMessages)
             : base(logger)
         {
             _mapper = mapper;
             _provider = serviceProvider;
             GeneralMessages = generalMessages;
+            ErrorMessages = errorMessages;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -49,16 +54,20 @@ namespace WaPesLeague.Bot.Services
             ulong counter = 0;
             while (!stoppingToken.IsCancellationRequested)
             {
-                var nowAtStartOfExecution = DateTime.Now;
+                var nowAtStartOfExecution = DateTime.UtcNow;
                 counter++;
                 try
                 {
                     var mixRequestsToHandle = MixRequestQueue.Queue.TryDeQueueAll();
                     var guildMembersAdded = GuildMemberAddedQueue.Queue.TryDeQueueAll();
+                    var serverRequestsToHandle = ServerRequestQueue.Queue.TryDeQueueAll();
+                    //var guildMembersUpdated = GuildMemberUpdatedQueue.Queue.TryDeQueueAll();
 
-                    if (mixRequestsToHandle.Any() || guildMembersAdded.Any())
+                    //if (mixRequestsToHandle.Any() || guildMembersAdded.Any() || serverRequestsToHandle.Any() || guildMembersUpdated.Any())
+                    if (mixRequestsToHandle.Any() || guildMembersAdded.Any() || serverRequestsToHandle.Any())
                     {
-                        var results = new List<DiscordWorkflowResult>();
+                        var mixRequestResults = new List<DiscordWorkflowResult>();
+                        var serverRequestResults = new List<DiscordWorkflowResult>();
                         using (var scope = _provider.CreateScope())
                         {
                             var _bot = scope.ServiceProvider.GetRequiredService<Base.Bot.Bot>();
@@ -67,7 +76,7 @@ namespace WaPesLeague.Bot.Services
 
                             foreach (var mixRequestDto in mixRequestsToHandle)
                             {
-                                Logger.LogInformation($"Handle Request: {mixRequestDto.ToLogString()}");
+                                //Logger.LogInformation($"Handle Request: {mixRequestDto.ToLogString()}");
                                 DiscordWorkflowResult result = null;
                                 switch (mixRequestDto.RequestType)
                                 {
@@ -129,7 +138,7 @@ namespace WaPesLeague.Bot.Services
                                 result.FollowUpParameters.DiscordChannelId = mixRequestDto.DiscordCommandProps.ChannelId;
                                 result.FollowUpParameters.Server = mixRequestDto.Server;
                                 result.FollowUpParameters.DiscordMessageId = mixRequestDto.DiscordCommandProps.MessageId;
-                                results.Add(result);
+                                mixRequestResults.Add(result);
                                 if (result.NotifyRequests?.Any() ?? false)
                                     signOutNotifications.AddRange(result.NotifyRequests);
                             }
@@ -138,8 +147,57 @@ namespace WaPesLeague.Bot.Services
                             {
                                 await HandleGuildMemberAddedAsync(guildMemberAdded, scope, discordClient);
                             }
-                            await HandleWorkflowResults(results, scope, discordClient);
+
+                            foreach (var serverRequestsDto in serverRequestsToHandle)
+                            {
+                                try
+                                {
+                                    DiscordWorkflowResult result = null;
+                                    switch (serverRequestsDto.RequestType)
+                                    {
+                                        case ServerRequestType.GetServerButtons:
+                                            result = await HandleGetServerButtonsAsync(serverRequestsDto, scope);
+                                            break;
+                                        case ServerRequestType.AddServerButton:
+                                            result = await HandleAddServerButtonAsync(serverRequestsDto, scope);
+                                            break;
+                                        case ServerRequestType.DeleteButton:
+                                            result = await HandleDeleteServerButtonAsync(serverRequestsDto, scope);
+                                            break;
+                                        case ServerRequestType.SetSniping:
+                                            result = await HandleSetSnipingAsync(serverRequestsDto, scope);
+                                            break;
+                                        default:
+                                            Logger.LogError(new ArgumentException($"{serverRequestsDto.RequestType} is not supported in the Hosted service: RequestService"), $"{serverRequestsDto.RequestType} is not supported in the Hosted service: RequestService");
+                                            break;
+                                    }
+                                    result.FollowUpParameters.DiscordChannelId = serverRequestsDto.DiscordCommandProps.ChannelId;
+                                    result.FollowUpParameters.Server = serverRequestsDto.Server;
+                                    result.FollowUpParameters.DiscordMessageId = serverRequestsDto.DiscordCommandProps.MessageId;
+
+                                    serverRequestResults.Add(result);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Logger.LogError(ex, $"ServerRequestHandling failed for: {serverRequestsDto.ToLogString()}");
+                                    var failedResult = new DiscordWorkflowResult(string.Format(ErrorMessages.BaseError.GetValueForLanguage(), ex.Message), false);
+                                    failedResult.FollowUpParameters.DiscordChannelId = serverRequestsDto.DiscordCommandProps.ChannelId;
+                                    failedResult.FollowUpParameters.Server = serverRequestsDto.Server;
+                                    failedResult.FollowUpParameters.DiscordMessageId = serverRequestsDto.DiscordCommandProps.MessageId;
+                                    serverRequestResults.Add(failedResult);
+                                }
+                                
+                            }
+
+                            //foreach (var guildMemberUpdated in guildMembersUpdated)
+                            //{
+                            //    await HandleGuildMemberUpdatedAsync(guildMemberUpdated, scope, discordClient);
+                            //}
+
+                            await HandleMixRequestWorkflowResults(mixRequestResults, scope, discordClient);
                             await HandleSignOutNotificationAsync(signOutNotifications, discordClient);
+
+                            await HandleServerRequestWorkflowResults(serverRequestResults, scope, discordClient);
                         }
                     }
                 }
@@ -177,10 +235,14 @@ namespace WaPesLeague.Bot.Services
         private async Task<DiscordWorkflowResult> HandleSignInAsync(MixRequestDto mixRequestDto, IServiceScope scope)
         {
             var _userWorkflow = scope.ServiceProvider.GetRequiredService<IUserWorkflow>();
+            var _userMemberManager = scope.ServiceProvider.GetRequiredService<IUserMemberManager>();
             var _mixSessionWorkflow = scope.ServiceProvider.GetRequiredService<IMixSessionWorkflow>();
             var userId = await _userWorkflow.GetOrCreateUserIdByDiscordId(_mapper.Map<DiscordCommandPropsDto>(mixRequestDto.DiscordCommandProps));
 
-            var signInDto = new SignInDto(mixRequestDto.DiscordCommandProps.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, userId, mixRequestDto.Team, mixRequestDto.Position, mixRequestDto.ExtraInfo, mixRequestDto.Server.ServerId, mixRequestDto.RoleIdsPlayer1, mixRequestDto.ActorRoleIds);
+            var dbNow = DateTimeHelper.GetDatabaseNow();
+            var userMember = await _userMemberManager.GetUserMemberWithSnipersByUserIdAndServerIdAsync(userId, mixRequestDto.Server.ServerId, dbNow);
+
+            var signInDto = new SignInDto(mixRequestDto.DiscordCommandProps.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, userId, mixRequestDto.Team, mixRequestDto.Position, mixRequestDto.ExtraInfo, mixRequestDto.Server, mixRequestDto.RoleIdsPlayer1, mixRequestDto.ActorRoleIds, mixRequestDto.DiscordCommandProps.RequestedByUserId, userMember);
 
             return await _mixSessionWorkflow.SignInAsync(signInDto);
         }
@@ -266,7 +328,7 @@ namespace WaPesLeague.Bot.Services
             var player1Id = await _userWorkflow.GetOrCreateUserIdByDiscordId(_mapper.Map<DiscordCommandPropsDto>(mixRequestDto.Player1));
             var player2Id = await _userWorkflow.GetOrCreateUserIdByDiscordId(_mapper.Map<DiscordCommandPropsDto>(mixRequestDto.Player2));
 
-            return await _mixSessionWorkflow.SwapAsync(mixRequestDto.Server.ServerId, mixRequestDto.DiscordCommandProps.ChannelId, player1Id, player2Id, mixRequestDto.DiscordCommandProps.RequestedByUserId, mixRequestDto.RoleIdsPlayer1, mixRequestDto.RoleIdsPlayer2, mixRequestDto.ActorRoleIds);
+            return await _mixSessionWorkflow.SwapAsync(mixRequestDto.Server, mixRequestDto.DiscordCommandProps.ChannelId, player1Id, player2Id, mixRequestDto.DiscordCommandProps.RequestedByUserId, mixRequestDto.RoleIdsPlayer1, mixRequestDto.RoleIdsPlayer2, mixRequestDto.ActorRoleIds);
         }
 
         private async Task<DiscordWorkflowResult> HandleOpenTeamAsync(MixRequestDto mixRequestDto, IServiceScope scope)
@@ -289,7 +351,33 @@ namespace WaPesLeague.Bot.Services
         }
         #endregion
 
-        #region GuildMemberAdded
+        #region ServerCommandQueueHandling
+        private async Task<DiscordWorkflowResult> HandleGetServerButtonsAsync(ServerRequestDto serverRequestDto, IServiceScope scope)
+        {
+            var serverButtonWorkflow = scope.ServiceProvider.GetRequiredService<IServerButtonWorkflow>();
+            return await serverButtonWorkflow.HandleGetServerButtonsAsync(serverRequestDto.Server);
+        }
+
+        private async Task<DiscordWorkflowResult> HandleAddServerButtonAsync(ServerRequestDto serverRequestDto, IServiceScope scope)
+        {
+            var serverButtonWorkflow = scope.ServiceProvider.GetRequiredService<IServerButtonWorkflow>();
+            return await serverButtonWorkflow.HandleAddServerButtonAsync(_mapper.Map<DiscordCommandPropsDto>(serverRequestDto.DiscordCommandProps), serverRequestDto.Options);
+        }
+
+        private async Task<DiscordWorkflowResult> HandleDeleteServerButtonAsync(ServerRequestDto serverRequestDto, IServiceScope scope)
+        {
+            var serverButtonWorkflow = scope.ServiceProvider.GetRequiredService<IServerButtonWorkflow>();
+            return await serverButtonWorkflow.HandleDeleteServerButtonAsync(serverRequestDto.Server, serverRequestDto.ServerButtonId.Value);
+        }
+
+        private async Task<DiscordWorkflowResult> HandleSetSnipingAsync(ServerRequestDto serverRequestDto, IServiceScope scope)
+        {
+            var serverWorkflow = scope.ServiceProvider.GetRequiredService<IServerWorkflow>();
+            return await serverWorkflow.SetSnipingAsync(serverRequestDto.Server, serverRequestDto.SnipingIntervalAfterRegistrationOpeningInMinutes.Value, serverRequestDto.SnipingSignUpDelayInMinutes.Value, serverRequestDto.SnipingSignUpDelayDurationInHours.Value);
+        }
+        #endregion
+
+        #region GuildMemberAddedOrUpdated
         private async Task HandleGuildMemberAddedAsync(GuildMemberAddedDto guildMemberAddedDto, IServiceScope scope, DiscordClient discordClient)
         {
             var _serverWorkflow = scope.ServiceProvider.GetRequiredService<IServerWorkflow>();
@@ -331,10 +419,20 @@ namespace WaPesLeague.Bot.Services
             }
         }
 
+        //private async Task HandleGuildMemberUpdatedAsync(GuildMemberUpdatedDto guildMemberUpdatedDto, IServiceScope scope, DiscordClient discordClient)
+        //{
+        //    var _serverWorkflow = scope.ServiceProvider.GetRequiredService<IServerWorkflow>();
+        //    var server = await _serverWorkflow.GetOrCreateServerAsync(guildMemberUpdatedDto.DiscordServerId, guildMemberUpdatedDto.DiscordServerName);
+        //    var guild = await discordClient.GetGuildAsync(guildMemberUpdatedDto.DiscordServerId);
+        //    var member = await guild.GetMemberAsync(guildMemberUpdatedDto.DiscordUserId);
+        //    var logs = await guild.GetAuditLogsAsync(10);
+        //    var a = "zever";
+
+        //}
         #endregion
 
         #region resultHandling
-        private async Task HandleWorkflowResults(List<DiscordWorkflowResult> results, IServiceScope scope, DiscordClient discordClient)
+        private async Task HandleMixRequestWorkflowResults(List<DiscordWorkflowResult> results, IServiceScope scope, DiscordClient discordClient)
         {
             if (!results.Any())
                 return;
@@ -355,6 +453,7 @@ namespace WaPesLeague.Bot.Services
                         var message = await channel.GetMessageAsync(failedResult.FollowUpParameters.DiscordMessageId);
                         var msg = await new DiscordMessageBuilder()
                             .WithContent($"{Constants.DiscordEmoji.ThumbsDownString} {failedResult.Message}")
+                            .AddDiscordLinkButtonsToMessageIfNeeded(failedResult.FollowUpParameters.Server, new Random())
                             .WithReply(message.Id, true)
                             .SendAsync(channel);
                     }
@@ -375,7 +474,10 @@ namespace WaPesLeague.Bot.Services
                     if (channelSuccessResults.Any(x => x.FollowUpParameters.DeleteMixSuccess == true))
                     {
                         var firstDeleteSuccess = channelSuccessResults.First(x => x.FollowUpParameters.DeleteMixSuccess == true);
-                        await channel1.SendMessageAsync(firstDeleteSuccess.Message);
+                        var deleteMessage = new DiscordMessageBuilder()
+                            .WithContent(firstDeleteSuccess.Message)
+                            .AddDiscordLinkButtonsToMessageIfNeeded(firstDeleteSuccess.FollowUpParameters.Server, new Random());
+                        await channel1.SendMessageAsync(deleteMessage);
                         continue;
                     }
 
@@ -389,7 +491,11 @@ namespace WaPesLeague.Bot.Services
                     }
 
                     var mixResult = await _mixSessionWorkflow.ShowAsync(firstChannelResult.Server.ServerId, channelSuccessResults.Key);
-                    await channel1.SendMessageAsync(mixResult.Message);
+                    var replyMessage = new DiscordMessageBuilder()
+                        .WithContent(mixResult.Message)
+                        .AddDiscordLinkButtonsToMessageIfNeeded(firstChannelResult.Server, new Random());
+
+                    await channel1.SendMessageAsync(replyMessage);
 
                     if (channelSuccessResults.Any(x => x.FollowUpParameters.CheckOpenExtraChannel == true))
                     {
@@ -412,6 +518,53 @@ namespace WaPesLeague.Bot.Services
                     }
                 }
             }
+        }
+
+        private async Task HandleServerRequestWorkflowResults(List<DiscordWorkflowResult> results, IServiceScope scope, DiscordClient discordClient)
+        {
+            if (!results.Any())
+                return;
+
+
+            var channels = new List<DiscordChannel>();
+            var failedResults = results.Where(r => r.Success == false).ToList();
+            var successResults = results.Where(r => r.Success == true).ToList();
+
+            if (failedResults.Any())
+            {
+                foreach (var channelFailedResults in failedResults.GroupBy(x => x.FollowUpParameters.DiscordChannelId))
+                {
+                    var channel = await discordClient.GetChannelAsync(channelFailedResults.Key);
+                    channels.Add(channel);
+                    foreach (var failedResult in channelFailedResults)
+                    {
+                        var message = await channel.GetMessageAsync(failedResult.FollowUpParameters.DiscordMessageId);
+                        var msg = await new DiscordMessageBuilder()
+                            .WithContent($"{Constants.DiscordEmoji.ThumbsDownString} {failedResult.Message}")
+                            .AddDiscordLinkButtonsToMessageIfNeeded(failedResult.FollowUpParameters.Server, new Random())
+                            .WithReply(message.Id, true)
+                            .SendAsync(channel);
+                    }
+                }
+            }
+
+            if (successResults.Any())
+            {
+                foreach (var channelSuccessResults in successResults.GroupBy(x => x.FollowUpParameters.DiscordChannelId))
+                {
+                    var channel1 = channels.FirstOrDefault(ch => ch.Id == channelSuccessResults.Key) ?? await discordClient.GetChannelAsync(channelSuccessResults.Key);
+                    foreach (var successResult in channelSuccessResults)
+                    {
+                        var message = await channel1.GetMessageAsync(successResult.FollowUpParameters.DiscordMessageId);
+                        var msg = await new DiscordMessageBuilder()
+                            .WithContent($"{Constants.DiscordEmoji.ThumbsUpString} {successResult.Message}")
+                            .AddDiscordLinkButtonsToMessageIfNeeded(successResult.FollowUpParameters.Server, new Random())
+                            .WithReply(message.Id, true)
+                            .SendAsync(channel1);
+                    }
+                }
+            }
+
         }
 
         private async Task HandleSignOutNotificationAsync(List<NotifyRequest> singOutNotifyRequests, DiscordClient discordClient)

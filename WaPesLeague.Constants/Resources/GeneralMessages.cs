@@ -79,6 +79,7 @@ namespace WaPesLeague.Constants.Resources
         public Dictionary<string, string> MyStatsTitle { get; set; }
         public Dictionary<string, string> NewFormationAddedResponse { get; set; }
         public Dictionary<string, string> No { get; set; }
+        public Dictionary<string, string> NoButtonsConfiguredOnServer { get; set; }
         public Dictionary<string, string> NoNameFound { get; set; }
         public Dictionary<string, string> NotifySignedOut { get; set; }
         public Dictionary<string, string> NothingChanged { get; set; }
@@ -100,6 +101,8 @@ namespace WaPesLeague.Constants.Resources
         public Dictionary<string, string> RegistrationDescription { get; set; }
         public Dictionary<string, string> RegistrationTimeDescription { get; set; }
         public Dictionary<string, string> RegistrationTitle { get; set; }
+        public Dictionary<string, string> ServerButtonGroupInfoString { get; set; }
+        public Dictionary<string, string> ServerButtonInfoString { get; set; }
         public Dictionary<string, string> ServerInfo { get; set; }
         public Dictionary<string, string> SetDefaultServerFormationDescription { get; set; }
         public Dictionary<string, string> SetDefaultServerFormationTitle { get; set; }
@@ -138,6 +141,7 @@ namespace WaPesLeague.Constants.Resources
         public Dictionary<string, string> SignUserInTitle { get; set; }
         public Dictionary<string, string> SignUserOutDescription { get; set; }
         public Dictionary<string, string> SignUserOutTitle { get; set; }
+        public Dictionary<string, string> SnipingValuesSet { get; set; }
         public Dictionary<string, string> StartTimeDescription { get; set; }
         public Dictionary<string, string> StartTimeTitle { get; set; }
         public Dictionary<string, string> SwitchToSamePosition { get; set; }

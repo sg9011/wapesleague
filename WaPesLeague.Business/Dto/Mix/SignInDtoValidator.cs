@@ -1,9 +1,11 @@
 ﻿using FluentValidation;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WaPesLeague.Business.Workflows.Interfaces;
 using WaPesLeague.Constants;
 using WaPesLeague.Constants.Resources;
+using WaPesLeague.Data.Helpers;
 using WaPesLeague.Data.Managers.Interfaces;
 
 namespace WaPesLeague.Business.Dto.Mix
@@ -11,22 +13,24 @@ namespace WaPesLeague.Business.Dto.Mix
     public class SignInDtoValidator : AbstractValidator<SignInDto>
     {
         private readonly IMixChannelManager _mixChannelManager;
-        private readonly IMixSessionManager _mixSessionManager;
-        private readonly IMixGroupRoleOpeningWorkflow _mixGroupRoleOpeningWorkflow;
         private readonly IMixSessionWorkflow _mixSessionWorkflow;
+        private readonly IMixSessionManager _mixSessionManager;
+        private readonly IMixPositionReservationManager _mixPositionReservationManager;
         private readonly ErrorMessages ErrorMessages;
         private readonly GeneralMessages GeneralMessages;
 
         private bool hasChannel { get; set; }
         private bool userNotAlreadyActiveInOtherMixChannel { get; set; }
+        private bool withinValidHours { get; set; }
+        private MixGroupIdAndRegistrationTime mixGroupIdAndRegistrationTime { get; set; }
 
-        public SignInDtoValidator(IMixChannelManager mixChannelManager, IMixSessionManager mixSessionManager, IMixGroupRoleOpeningWorkflow mixGroupRoleOpeningWorkflow, IMixSessionWorkflow mixSessionWorkflow, ErrorMessages errorMessages, GeneralMessages generalMessages)
+        public SignInDtoValidator(IMixChannelManager mixChannelManager, IMixSessionWorkflow mixSessionWorkflow, IMixSessionManager mixSessionManager, IMixPositionReservationManager mixPositionReservationManager, ErrorMessages errorMessages, GeneralMessages generalMessages)
         {
             CascadeMode = CascadeMode.Stop;
             _mixChannelManager = mixChannelManager;
-            _mixSessionManager = mixSessionManager;
-            _mixGroupRoleOpeningWorkflow = mixGroupRoleOpeningWorkflow;
             _mixSessionWorkflow = mixSessionWorkflow;
+            _mixSessionManager = mixSessionManager;
+            _mixPositionReservationManager = mixPositionReservationManager;
             ErrorMessages = errorMessages;
             GeneralMessages = generalMessages;
             
@@ -48,7 +52,14 @@ namespace WaPesLeague.Business.Dto.Mix
                 .MustAsync(UserNotActiveInOtherChannelInSameMixGroup)
                 .WithMessage(ErrorMessages.UserActiveInOtherMix.GetValueForLanguage())
                 .MustAsync(WithinValidHours)
-                .WithMessage(ErrorMessages.RegistrationWithinValidHours.GetValueForLanguage());
+                .WithMessage(ErrorMessages.RegistrationWithinValidHours.GetValueForLanguage())
+                .MustAsync(NotSnipingAgain)
+                .WithMessage(z => 
+                    string.Format(ErrorMessages.NotSnipingAgain.GetValueForLanguage()
+                        , DateTimeHelper.ConvertDateTimeToApplicationTimeZone(z.UserMember.Snipers.First().DateEnd, z.Server.TimeZoneName).ToString("ddd, dd MMM HH:mm")
+                        , z.Server.ServerSnipings.First().IntervalAfterRegistrationOpeningInMinutes
+                        , z.Server.ServerSnipings.First().SignUpDelayInMinutes)
+                    );
         }
 
         private async Task<bool> HaveActiveMixInChannel(SignInDto dto, CancellationToken cancellationToken)
@@ -58,16 +69,26 @@ namespace WaPesLeague.Business.Dto.Mix
 
         private async Task<bool> UserNotActiveInOtherChannelInSameMixGroup(SignInDto dto, CancellationToken cancellationToken)
         {
+            //This is so wrong --> is always true now
             userNotAlreadyActiveInOtherMixChannel = !hasChannel || await _mixChannelManager.UserCanSignIntoMixChannelAsync(dto.DiscordServerId.ToString(), dto.DiscordChannelId.ToString(), dto.UserId);
             return userNotAlreadyActiveInOtherMixChannel;
         }
 
         private async Task<bool> WithinValidHours(SignInDto dto, CancellationToken cancellationToken)
         {
-            if (!userNotAlreadyActiveInOtherMixChannel)
-                return true;
+            mixGroupIdAndRegistrationTime ??= await _mixSessionManager.HasOpenMixSessionByDiscordIds(dto.DiscordServerId.ToString(), dto.DiscordChannelId.ToString(), dto.DbSignInTime);
 
-            return await _mixSessionWorkflow.ValidateWithinValidHours(dto.DiscordServerId.ToString(), dto.DiscordChannelId.ToString(), dto.RoleIds);
+            withinValidHours = !userNotAlreadyActiveInOtherMixChannel || await _mixSessionWorkflow.ValidateWithinValidHours(mixGroupIdAndRegistrationTime, dto.RoleIds, dto.DbSignInTime);
+            return withinValidHours;
+        }
+
+        private async Task<bool> NotSnipingAgain(SignInDto dto, CancellationToken cancellationToken)
+        {
+            mixGroupIdAndRegistrationTime ??= await _mixSessionManager.HasOpenMixSessionByDiscordIds(dto.DiscordServerId.ToString(), dto.DiscordChannelId.ToString(), dto.DbSignInTime);
+            return !withinValidHours ||
+                (_mixSessionWorkflow.ValidateIsNotSnipingAgain(mixGroupIdAndRegistrationTime, dto.UserMember, dto.Server, dto.DbSignInTime)
+                    || ((await _mixPositionReservationManager.GetActiveMixPositionReservationByServerIdAndDiscordChannelIdAndUserIdAsync(dto.Server.ServerId, dto.DiscordChannelId.ToString(), dto.UserId)) != null)
+                );
         }
     }
 }

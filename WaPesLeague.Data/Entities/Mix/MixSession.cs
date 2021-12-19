@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using WaPesLeague.Data.Entities.Discord;
 
 namespace WaPesLeague.Data.Entities.Mix
 {
@@ -27,5 +28,6 @@ namespace WaPesLeague.Data.Entities.Mix
         public virtual User.User RoomOwner { get; set; }
 
         public virtual List<MixUserPositionSessionStat> UserPositionStats { get; set; }
+        public virtual List<Sniper> Snipers { get; set; }
     }
 }

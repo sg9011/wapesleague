@@ -22,6 +22,14 @@ namespace WaPesLeague.Data.Entities.Discord.Configurations
             builder.HasOne(um => um.Server)
                 .WithMany(s => s.Members)
                 .HasForeignKey(um => um.ServerId);
+
+            builder.HasMany(um => um.Snipers)
+                .WithOne(s => s.UserMember)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasMany(um => um.UserMemberServerRoles)
+                .WithOne(umsr => umsr.UserMember)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

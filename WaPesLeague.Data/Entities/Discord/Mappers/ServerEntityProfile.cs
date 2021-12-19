@@ -17,6 +17,12 @@ namespace WaPesLeague.Data.Entities.Discord.Mappers
             CreateMap<ServerTeam, ServerTeam>()
                 .ForMember(dest => dest.Server, opt => opt.Ignore())
                 .ForMember(dest => dest.Tags, opt => opt.Ignore());
+
+
+            CreateMap<ServerSniping, ServerSniping>()
+                .ForMember(dest => dest.ServerSnipingId, opt => opt.Ignore())
+                .ForMember(dest => dest.Server, opt => opt.Ignore());
+                
         }
     }
 }

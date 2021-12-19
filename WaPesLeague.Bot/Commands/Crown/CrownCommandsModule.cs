@@ -37,9 +37,9 @@ namespace WaPesLeague.Bot.Commands.Crown
                     await member.ModifyAsync(m => m.Nickname = newNickName);
                 }
             }
-            catch(Exception)
+            catch(Exception ex)
             {
-                var a = "Z";
+                Logger.LogError(ex, "Set Crown command failed");
             }
         }
 
@@ -74,9 +74,9 @@ namespace WaPesLeague.Bot.Commands.Crown
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                var a = "Z";
+                Logger.LogError(ex, "UnCrown command failed");
             }
         }
 
@@ -160,8 +160,9 @@ namespace WaPesLeague.Bot.Commands.Crown
                     return;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.LogError(ex, "Result command failed");
             }
         }
     }

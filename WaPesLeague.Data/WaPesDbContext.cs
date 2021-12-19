@@ -2,12 +2,16 @@
 using WaPesLeague.Data.Entities.Association.Configurations;
 using WaPesLeague.Data.Entities.Discord;
 using WaPesLeague.Data.Entities.Discord.Configurations;
+using WaPesLeague.Data.Entities.FileImport;
 using WaPesLeague.Data.Entities.FileImport.Configurations;
 using WaPesLeague.Data.Entities.Formation;
 using WaPesLeague.Data.Entities.Formation.Configurations;
 using WaPesLeague.Data.Entities.Formation.Seeders;
 using WaPesLeague.Data.Entities.Match.Configurations;
 using WaPesLeague.Data.Entities.Match.Seeders;
+using WaPesLeague.Data.Entities.Metadata;
+using WaPesLeague.Data.Entities.Metadata.Configurations;
+using WaPesLeague.Data.Entities.Metadata.Seeders;
 using WaPesLeague.Data.Entities.Mix;
 using WaPesLeague.Data.Entities.Mix.Configurations;
 using WaPesLeague.Data.Entities.Platform;
@@ -29,10 +33,14 @@ namespace WaPesLeague.Data
 
         }
 
+        public DbSet<Metadata> Metadatas { get; set; }
+
         public DbSet<User> Users { get; set; }
         public DbSet<Platform> Platforms { get; set; }
         public DbSet<UserPlatform> UserPlatforms { get; set; }
         public DbSet<UserMember> UserMembers { get; set; }
+        public DbSet<UserMetadata> UserMetadatas { get; set; }
+        
 
         public DbSet<Server> Servers { get; set; }
         public DbSet<ServerFormation> ServerFormations { get; set; }
@@ -42,6 +50,11 @@ namespace WaPesLeague.Data
         public DbSet<ServerTeamTag> ServerTeamTags { get; set; }
         public DbSet<ServerRole> ServerRoles { get; set; }
         public DbSet<ServerEvent> ServerEvents { get; set; }
+        public DbSet<ServerButtonGroup> ServerButtonGroups { get; set; }
+        public DbSet<ServerButton> ServerButtons { get; set; }
+        public DbSet<ServerSniping> ServerSnipings { get; set; }
+        public DbSet<Sniper> Snipers { get; set; }
+        public DbSet<UserMemberServerRole> UserMemberServerRoles { get; set; }
 
 
         public DbSet<MixGroup> MixGroups { get; set; }
@@ -66,12 +79,30 @@ namespace WaPesLeague.Data
         public DbSet<PositionGroup> PositionGroups { get; set; }
         public DbSet<PositionTag> PositionTags { get; set; }
 
+        public DbSet<GoogleSheetImportType> GoogleSheetImportTypes { get; set; }
+        public DbSet<FileImport> FileImports { get; set; }
+        public DbSet<FileImportRecord> FileImportRecords { get; set; }
+
+        public DbSet<Entities.Association.AssociationTenant> AssociationTenants { get; set; }
+        public DbSet<Entities.Association.Association> Associations { get; set; }
+        public DbSet<Entities.Association.AssociationTeam> AssociationTeams { get; set; }
+        public DbSet<Entities.Association.AssociationTenantPlayer> AssociationTenantPlayers { get; set; }
+        public DbSet<Entities.Association.AssociationLeagueGroup> AssociationLeagueGroups { get; set; }
+        public DbSet<Entities.Association.AssociationLeagueSeason> AssociationLeagueSeasons { get; set; }
+        public DbSet<Entities.Association.Division> Divisions { get; set; }
+        public DbSet<Entities.Association.DivisionRound> DivisionRounds { get; set; }
+        public DbSet<Entities.Association.DivisionGroup> DivisionGroups { get; set; }
+        public DbSet<Entities.Association.DivisionGroupRound> DivisionGroupRounds { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.ApplyConfiguration(new MetadataConfiguration());
+
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new UserPlatformConfiguration());
             modelBuilder.ApplyConfiguration(new UserMemberConfiguration());
+            modelBuilder.ApplyConfiguration(new UserMetadataConfiguration());
 
             modelBuilder.ApplyConfiguration(new ServerConfiguration());
             modelBuilder.ApplyConfiguration(new ServerTeamConfiguration());
@@ -81,6 +112,11 @@ namespace WaPesLeague.Data
             modelBuilder.ApplyConfiguration(new ServerFormationTagConfiguration());
             modelBuilder.ApplyConfiguration(new ServerRoleConfiguration());
             modelBuilder.ApplyConfiguration(new ServerEventConfiguration());
+            modelBuilder.ApplyConfiguration(new ServerButtonGroupConfiguration());
+            modelBuilder.ApplyConfiguration(new ServerButtonConfiguration());
+            modelBuilder.ApplyConfiguration(new ServerSnipingConfiguration());
+            modelBuilder.ApplyConfiguration(new SniperConfiguration());
+            modelBuilder.ApplyConfiguration(new UserMemberServerRoleConfiguration());
 
             modelBuilder.ApplyConfiguration(new PlatformConfiguration());
 
@@ -138,7 +174,7 @@ namespace WaPesLeague.Data
             modelBuilder.ApplyConfiguration(new AssociationTeamPlayerConfiguration());
             #endregion
 
-            modelBuilder.ApplyConfiguration(new FileImportTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GoogleSheetTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FileImportConfiguration());
             modelBuilder.ApplyConfiguration(new FileImportRecordConfiguration());
 
@@ -149,6 +185,8 @@ namespace WaPesLeague.Data
 
             modelBuilder.SeedMatchTeamStatTypes();
             modelBuilder.SeedMatchTeamPlayerStatTypes();
+
+            modelBuilder.SeedMetadatas();
         }
     }
 }

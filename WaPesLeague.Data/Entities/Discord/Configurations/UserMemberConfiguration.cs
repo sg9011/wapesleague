@@ -26,6 +26,10 @@ namespace WaPesLeague.Data.Entities.Discord.Configurations
             builder.HasMany(um => um.Snipers)
                 .WithOne(s => s.UserMember)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasMany(um => um.UserMemberServerRoles)
+                .WithOne(umsr => umsr.UserMember)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

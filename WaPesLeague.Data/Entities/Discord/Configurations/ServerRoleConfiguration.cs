@@ -7,21 +7,25 @@ namespace WaPesLeague.Data.Entities.Discord.Configurations
     {
         public void Configure(EntityTypeBuilder<ServerRole> builder)
         {
-            builder.HasIndex(s => s.DiscordRoleId).HasDatabaseName("IX_Server_DiscordServerRoleIdId");
-            builder.Property(s => s.DiscordRoleId).HasMaxLength(50).IsRequired(true);
-            builder.Property(st => st.Name).HasMaxLength(50).IsRequired(true);
-            builder.Property(st => st.Description).HasMaxLength(400).IsRequired(false);
+            builder.HasIndex(sr => sr.DiscordRoleId).HasDatabaseName("IX_Server_DiscordServerRoleIdId");
+            builder.Property(sr => sr.DiscordRoleId).HasMaxLength(50).IsRequired(true);
+            builder.Property(sr => sr.Name).HasMaxLength(50).IsRequired(true);
+            builder.Property(sr => sr.Description).HasMaxLength(400).IsRequired(false);
 
-            builder.HasOne(st => st.Server)
+            builder.HasOne(sr => sr.Server)
                 .WithMany(s => s.ServerRoles)
-                .HasForeignKey(st => st.ServerId);
+                .HasForeignKey(sr => sr.ServerId);
 
-            builder.HasMany(st => st.MixGroupRoleOpenings)
+            builder.HasMany(sr => sr.MixGroupRoleOpenings)
                 .WithOne(s => s.ServerRole)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(st => st.MixTeamRoleOpenings)
+            builder.HasMany(sr => sr.MixTeamRoleOpenings)
                 .WithOne(s => s.ServerRole)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(sr => sr.UserMemberServerRoles)
+                .WithOne(umsr => umsr.ServerRole)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

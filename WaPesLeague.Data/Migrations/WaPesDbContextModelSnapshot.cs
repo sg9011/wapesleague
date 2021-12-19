@@ -685,6 +685,28 @@ namespace WaPesLeague.Data.Migrations
                     b.ToTable("Snipers");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.UserMemberServerRole", b =>
+                {
+                    b.Property<int>("UserMemberServerRoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ServerRoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserMemberId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserMemberServerRoleId");
+
+                    b.HasIndex("ServerRoleId");
+
+                    b.HasIndex("UserMemberId");
+
+                    b.ToTable("UserMemberServerRoles");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.FileImport.FileImport", b =>
                 {
                     b.Property<int>("FileImportId")
@@ -2890,6 +2912,25 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("UserMember");
                 });
 
+            modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.UserMemberServerRole", b =>
+                {
+                    b.HasOne("WaPesLeague.Data.Entities.Discord.ServerRole", "ServerRole")
+                        .WithMany("UserMemberServerRoles")
+                        .HasForeignKey("ServerRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WaPesLeague.Data.Entities.User.UserMember", "UserMember")
+                        .WithMany("UserMemberServerRoles")
+                        .HasForeignKey("UserMemberId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ServerRole");
+
+                    b.Navigation("UserMember");
+                });
+
             modelBuilder.Entity("WaPesLeague.Data.Entities.FileImport.FileImport", b =>
                 {
                     b.HasOne("WaPesLeague.Data.Entities.FileImport.GoogleSheetImportType", "FileImportType")
@@ -3486,6 +3527,8 @@ namespace WaPesLeague.Data.Migrations
                     b.Navigation("MixGroupRoleOpenings");
 
                     b.Navigation("MixTeamRoleOpenings");
+
+                    b.Navigation("UserMemberServerRoles");
                 });
 
             modelBuilder.Entity("WaPesLeague.Data.Entities.Discord.ServerSniping", b =>
@@ -3653,6 +3696,8 @@ namespace WaPesLeague.Data.Migrations
             modelBuilder.Entity("WaPesLeague.Data.Entities.User.UserMember", b =>
                 {
                     b.Navigation("Snipers");
+
+                    b.Navigation("UserMemberServerRoles");
                 });
 #pragma warning restore 612, 618
         }

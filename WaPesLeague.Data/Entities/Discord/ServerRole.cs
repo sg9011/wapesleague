@@ -15,5 +15,6 @@ namespace WaPesLeague.Data.Entities.Discord
         public virtual Server Server { get; set; }
         public virtual List<MixGroupRoleOpening> MixGroupRoleOpenings { get; set; }
         public virtual List<MixTeamRoleOpening> MixTeamRoleOpenings { get; set; }
+        public virtual List<UserMemberServerRole> UserMemberServerRoles { get; set; }
     }
 }

@@ -33,6 +33,7 @@ namespace WaPesLeague.Data.Managers
         {
             return await _context.Users
                 .Include(u => u.UserMembers)
+                    .ThenInclude(um => um.UserMemberServerRoles)
                 .Include(u => u.PlatformUsers)
                     .ThenInclude(up => up.Platform)
                 .Include(u => u.UserMetadatas)

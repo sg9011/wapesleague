@@ -22,7 +22,7 @@ namespace WaPesLeague.Bot.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             stoppingToken.Register(() => Logger.LogDebug("BotScanForServerMembersService background service Register Call."));
-            
+
             var startDelay = BackgroundTimerHelper.CalculateStartingDelay(new TimeSpan(5, 0, 0));
             await Task.Delay((int)startDelay.TotalMilliseconds);
 

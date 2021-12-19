@@ -20,5 +20,6 @@ namespace WaPesLeague.Data.Entities.User
         public virtual Server Server { get; set; }
 
         public virtual List<Sniper> Snipers { get; set; }
+        public virtual List<UserMemberServerRole> UserMemberServerRoles { get; set; }
     }
 }

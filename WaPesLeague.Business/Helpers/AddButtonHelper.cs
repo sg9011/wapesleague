@@ -8,7 +8,7 @@ namespace WaPesLeague.Business.Helpers
     {
         public static void MapOptionsToDto(this AddServerButtonDto dto, string optionsText, ErrorMessages errorMessages)
         {
-            var options = BaseOptionsHelper.SplitStringToOptions(optionsText);
+            var options = BaseOptionsHelper.SplitStringToOptions(optionsText, true);
 
             dto.Message = options.GetValueForParams(AddServerButtonTags.MessageParam());
             dto.URL = options.GetValueForParams(AddServerButtonTags.URLParam());

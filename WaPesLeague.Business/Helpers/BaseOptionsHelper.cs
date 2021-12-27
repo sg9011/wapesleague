@@ -10,18 +10,23 @@ namespace WaPesLeague.Business.Helpers
 {
     public static class BaseOptionsHelper
     {
-        public static IReadOnlyCollection<Option> SplitStringToOptions(string optionsText)
+        public static IReadOnlyCollection<Option> SplitStringToOptions(string optionsText, bool keep2ndAndFollowingSplitCharactersInString = false)
         {
             var options = new List<Option>();
             var splitted = optionsText?.Split("--", StringSplitOptions.RemoveEmptyEntries) ?? new string[] { };
             foreach (var split in splitted)
             {
-                var subSplit = split.Split(":");
+                var splitter = ":";
+                var subSplit = split.Split(splitter);
                 if (subSplit.Length == 1)
                 {
+                    splitter = "=";
                     subSplit = split.Split("=");
                 }
-                options.Add(new Option(subSplit[0].Trim(), string.Concat(subSplit[1..])?.Trim()));
+                var value = keep2ndAndFollowingSplitCharactersInString
+                    ? string.Join(splitter, subSplit[1..])?.Trim()
+                    : string.Concat(subSplit[1..])?.Trim();
+                options.Add(new Option(subSplit[0].Trim(), value));
             }
 
             return options;

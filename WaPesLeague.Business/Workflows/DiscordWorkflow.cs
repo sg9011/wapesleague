@@ -176,7 +176,7 @@ namespace WaPesLeague.Business.Workflows
             allUserMembersAndRoles.AddRange(userMembersToAdd);
 
             await HandleServerRolesAsync(allUserMembersAndRoles, serverRoles, activeServer.ServerId);
-            await HandleUserMemberServerRolesAsync(allUserMembersAndRoles, serverRoles);
+            await HandleUserMemberServerRolesAsync(allUserMembersAndRoles, serverRoles, activeServer.ServerId);
         }
 
         private async Task SaveUserAndUserMemberUpdatesAsync(List<UserMemberAndServerRolesDto> rangeToAdd, List<User> rangeOfUsersToAdd, List<UserMemberAndServerRolesDto> rangeOfUserMembersToAddAfterUsers, List<User> allUsers)
@@ -229,28 +229,48 @@ namespace WaPesLeague.Business.Workflows
             allServerRoles.AddRange(serverRolesToAdd);
         }
 
-        private async Task HandleUserMemberServerRolesAsync(List<UserMemberAndServerRolesDto> allUserMembersAndTheirDiscordServerRoles, List<ServerRole> allServerRoles)
+        private async Task HandleUserMemberServerRolesAsync(List<UserMemberAndServerRolesDto> allUserMembersAndTheirDiscordServerRoles, List<ServerRole> allServerRoles, int serverId)
         {
+            var dbUserMembersAndRoles = await _userMemberServerRoleManager.GetAllByServerIdAsync(serverId);
             var userMemberServerRolesToAdd = new List<UserMemberServerRole>();
             var userMemberServerRolesToDelete = new List<UserMemberServerRole>();
 
             foreach (var userMemberAndRoles in allUserMembersAndTheirDiscordServerRoles)
             {
-                var newRolesForUser = (userMemberAndRoles.UserMember.UserMemberServerRoles?.Any() ?? false)
-                    ? userMemberAndRoles.DiscordServerRoleDtos.Where(x => !userMemberAndRoles.UserMember.UserMemberServerRoles.Any(e => string.Equals(x.DiscordRoleId, e.ServerRole.DiscordRoleId, StringComparison.InvariantCultureIgnoreCase)))
-                    : userMemberAndRoles.DiscordServerRoleDtos;
+                var hasDiscordRoles = userMemberAndRoles.DiscordServerRoleDtos?.Any() ?? false;
+                var hasRolesinDb = userMemberAndRoles.UserMember.UserMemberServerRoles?.Any() ?? false;
+                var currentUserMemberServerRoles = dbUserMembersAndRoles.Where(dbUm => userMemberAndRoles.UserMember.UserMemberId == dbUm.UserMemberId).ToList();
 
-                userMemberServerRolesToAdd.AddRange(newRolesForUser.Select(x => new UserMemberServerRole()
+                if (hasDiscordRoles)
                 {
-                    UserMemberId = userMemberAndRoles.UserMember.UserMemberId,
-                    ServerRoleId = allServerRoles.First(asr => string.Equals(asr.DiscordRoleId, x.DiscordRoleId, StringComparison.InvariantCultureIgnoreCase)).ServerRoleId
-                }));
+                    var newRolesForUser = new List<ServerRoleDto>();
+                        
+                    if (hasRolesinDb)
+                    {
+                        newRolesForUser = userMemberAndRoles.DiscordServerRoleDtos.Where(discordRole => currentUserMemberServerRoles.Any(dbRole => string.Equals(discordRole.DiscordRoleId, dbRole.ServerRole.DiscordRoleId, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                    }
+                    else
+                    {
+                        newRolesForUser = userMemberAndRoles.DiscordServerRoleDtos;
+                    }
 
-                var deleteRolesForUser = (userMemberAndRoles.DiscordServerRoleDtos?.Any() ?? false)
-                    ? userMemberAndRoles.UserMember.UserMemberServerRoles.Where(x => !userMemberAndRoles.DiscordServerRoleDtos.Any(e => string.Equals(e.DiscordRoleId, x.ServerRole.DiscordRoleId, StringComparison.InvariantCultureIgnoreCase)))
-                    : userMemberAndRoles.UserMember.UserMemberServerRoles ?? new List<UserMemberServerRole>();
 
-                userMemberServerRolesToDelete.AddRange(deleteRolesForUser);
+                    userMemberServerRolesToAdd.AddRange(newRolesForUser.Select(x => new UserMemberServerRole()
+                    {
+                        UserMemberId = userMemberAndRoles.UserMember.UserMemberId,
+                        ServerRoleId = allServerRoles.First(asr => string.Equals(asr.DiscordRoleId, x.DiscordRoleId, StringComparison.InvariantCultureIgnoreCase)).ServerRoleId
+                    }));
+                }
+
+                if (hasRolesinDb)
+                {
+                    var deleteRolesForUser = new List<UserMemberServerRole>();
+                    deleteRolesForUser = hasDiscordRoles
+                        ? currentUserMemberServerRoles.Where(dbRole => !userMemberAndRoles.DiscordServerRoleDtos.Any(discordRole => string.Equals(discordRole.DiscordRoleId, dbRole.ServerRole.DiscordRoleId, StringComparison.InvariantCultureIgnoreCase))).ToList()
+                        : currentUserMemberServerRoles;
+
+                    userMemberServerRolesToDelete.AddRange(deleteRolesForUser);
+                }
             }
             if (userMemberServerRolesToAdd.Any())
             {

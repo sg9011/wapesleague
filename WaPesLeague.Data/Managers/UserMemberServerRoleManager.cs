@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using WaPesLeague.Data.Entities.Discord;
 using WaPesLeague.Data.Managers.Interfaces;
@@ -39,6 +41,15 @@ namespace WaPesLeague.Data.Managers
                 _logger.LogError(ex, $"Error while deleting multiple userMemberServerRoles, records to delete: {userMemberServerRoles?.Count ?? 0}");
                 return false;
             }
+        }
+
+        public async Task<List<UserMemberServerRole>> GetAllByServerIdAsync(int serverId)
+        {
+            return await _context.UserMemberServerRoles
+                .Include(umsr => umsr.ServerRole)
+                .Where(umsr => umsr.UserMember.ServerId == serverId)
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

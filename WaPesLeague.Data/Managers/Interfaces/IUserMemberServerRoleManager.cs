@@ -8,5 +8,6 @@ namespace WaPesLeague.Data.Managers.Interfaces
     {
         public Task<List<UserMemberServerRole>> AddMultipleAsync(List<UserMemberServerRole> userMemberServerRoles);
         public Task<bool> DeleteMultipleAsync(List<UserMemberServerRole> userMemberServerRoles);
+        public Task<List<UserMemberServerRole>> GetAllByServerIdAsync(int serverId);
     }
 }

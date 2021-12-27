@@ -20,7 +20,6 @@ namespace WaPesLeague.Bot.Commands.Crown
 
         }
 
-
         [Command("Crown")]
         [Description("Assign the crown to a user")]
         public async Task SetCrown(CommandContext ctx,
@@ -40,7 +39,7 @@ namespace WaPesLeague.Bot.Commands.Crown
             }
             catch(Exception ex)
             {
-                var a = "Z";
+                Logger.LogError(ex, "Set Crown command failed");
             }
         }
 
@@ -77,7 +76,7 @@ namespace WaPesLeague.Bot.Commands.Crown
             }
             catch (Exception ex)
             {
-                var a = "Z";
+                Logger.LogError(ex, "UnCrown command failed");
             }
         }
 
@@ -163,6 +162,7 @@ namespace WaPesLeague.Bot.Commands.Crown
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex, "Result command failed");
             }
         }
     }

@@ -1,4 +1,6 @@
 ﻿using Base.Bot.Infrastructure;
+using Base.Bot.Queue;
+using Base.Bot.Queue.Dto;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.Logging;
@@ -38,7 +40,8 @@ namespace Base.Bot
                 MinimumLogLevel = LogLevel.Warning,
                 LoggerFactory = loggerFactory,
                 Token = _discordSettings.Token,
-                TokenType = TokenType.Bot
+                TokenType = TokenType.Bot,
+                Intents = DiscordIntents.All,
             };
             _discordClient = new DiscordClient(config);
 
@@ -48,15 +51,32 @@ namespace Base.Bot
                 CaseSensitive = false,
                 Services = _serviceProvider
             };
+
             _commands = _discordClient.UseCommandsNext(commandsConfig);
             _commands.RegisterCommands(Assembly.GetEntryAssembly());
 
-            await _discordClient.ConnectAsync();
+            _discordClient.GuildMemberAdded += (s, e) =>
+            {
+                try
+                {
+                    _logger.LogWarning($"GuildMemberAdded Event!, Guild: {e?.Guild?.Id}");
+                    GuildMemberAddedQueue.Queue.Enqueue(new GuildMemberAddedDto(e.Guild.Id, e.Guild.Name, e.Member.Id));
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError(ex, "GuildMemberAdded event not added to the Queue!");
+                }
+                return Task.CompletedTask;
+                
+            };
 
+
+            await _discordClient.ConnectAsync();
 
             while (!_cts.IsCancellationRequested)
             {
-                await Task.Delay(TimeSpan.FromSeconds(10));
+                _logger.LogInformation("We are in the 30 second While Loop OLE!!");
+                await Task.Delay(TimeSpan.FromSeconds(30));
             }
             _logger.LogCritical("The Bot.cs class reached the last line of the class");
 
@@ -80,5 +100,36 @@ namespace Base.Bot
 
             return _discordClient;
         }
+
+        //_discordClient.MessageCreated += (s, e) =>
+        //{
+        //    try
+        //    {
+        //        MessageCreatedQueue.Queue.Enqueue(new MessageCreatedDto(e.Guild.Id, e.Guild.Name, e.Message.Timestamp.UtcDateTime, e.Author.Id));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "MessageCreated event not added to the Queue!");
+        //    }
+        //    return Task.CompletedTask;
+        //};
+
+        //_discordClient.GuildMemberUpdated += (s, e) =>
+        //{
+        //    try
+        //    {
+        //        _logger.LogWarning($"GuildMemberUpdated, Guild: {e?.Guild?.Id}");
+        //        var guildMemberUpdatedDto = new GuildMemberUpdatedDto(e.Guild.Id, e.Guild.Name, e.Member.Id, e.NicknameBefore, e.NicknameAfter, e.RolesBefore, e.RolesAfter);
+        //        if (guildMemberUpdatedDto.RolesChanged || guildMemberUpdatedDto.NickNameChanged)
+        //        {
+        //            GuildMemberUpdatedQueue.Queue.Enqueue(new GuildMemberUpdatedDto(e.Guild.Id, e.Guild.Name, e.Member.Id, e.NicknameBefore, e.NicknameAfter, e.RolesBefore, e.RolesAfter));
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "GuildMemberUpdated event not added to the Queue!");
+        //    }
+        //    return Task.CompletedTask;
+        //};
     }
 }

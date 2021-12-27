@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using WaPesLeague.Constants;
 using WaPesLeague.Constants.Resources;
@@ -9,18 +10,23 @@ namespace WaPesLeague.Business.Helpers
 {
     public static class BaseOptionsHelper
     {
-        public static IReadOnlyCollection<Option> SplitStringToOptions(string optionsText)
+        public static IReadOnlyCollection<Option> SplitStringToOptions(string optionsText, bool keep2ndAndFollowingSplitCharactersInString = false)
         {
             var options = new List<Option>();
             var splitted = optionsText?.Split("--", StringSplitOptions.RemoveEmptyEntries) ?? new string[] { };
             foreach (var split in splitted)
             {
-                var subSplit = split.Split(":");
+                var splitter = ":";
+                var subSplit = split.Split(splitter);
                 if (subSplit.Length == 1)
                 {
+                    splitter = "=";
                     subSplit = split.Split("=");
                 }
-                options.Add(new Option(subSplit[0].Trim(), string.Concat(subSplit[1..])?.Trim()));
+                var value = keep2ndAndFollowingSplitCharactersInString
+                    ? string.Join(splitter, subSplit[1..])?.Trim()
+                    : string.Concat(subSplit[1..])?.Trim();
+                options.Add(new Option(subSplit[0].Trim(), value));
             }
 
             return options;
@@ -64,6 +70,22 @@ namespace WaPesLeague.Business.Helpers
                 return editedValue.ToRealDecimal();
 
             throw new ArgumentException($"'{value}', {errorMessages.InvalidTimeValue.GetValueForLanguage()}");
+        }
+
+        public static decimal? OptionStringPercentageToDecimal(this string value, decimal? defaultValue, ErrorMessages errorMessages)
+        {
+            if (string.IsNullOrEmpty(value))
+                return defaultValue;
+
+            var numberChars = Array.FindAll(value.ToCharArray(), c => char.IsDigit(c) || char.Equals(c, ',') || char.Equals(c, '.'));
+            var editedValue = new string(numberChars);
+            editedValue = editedValue.Trim().Replace(',', '.');
+            if (!decimal.TryParse(editedValue, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal result))
+            {
+                throw new ArgumentException($"'{value}', {errorMessages.InvalidPercentageValue.GetValueForLanguage()}");
+            }
+
+            return result;
         }
     }
 }

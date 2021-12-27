@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using WaPesLeague.Data.Entities.Association.Enums;
 
 namespace WaPesLeague.Data.Entities.Association.Configurations
 {
@@ -9,6 +10,7 @@ namespace WaPesLeague.Data.Entities.Association.Configurations
         {
             builder.Property(a => a.Name).HasMaxLength(50).IsRequired(true);
             builder.Property(a => a.Code).HasMaxLength(10).IsRequired(true);
+            builder.Property(at => at.DefaultTeamType).HasDefaultValue(TeamType.Normal).HasConversion<string>().HasMaxLength(20).IsRequired(true);
             builder.Property(a => a.DateCreated).IsRequired(true);
 
             builder.HasOne(a => a.AssociationTenant)

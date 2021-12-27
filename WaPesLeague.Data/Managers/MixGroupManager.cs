@@ -21,11 +21,12 @@ namespace WaPesLeague.Data.Managers
             return mixGroup;
         }
 
-        public async Task<MixGroup> GetActiveMixGroupsByDiscordServerAndChannelIdAsync(string serverId, string channelId)
+        public async Task<MixGroup> GetActiveMixGroupByDiscordServerAndChannelIdAsync(string serverId, string channelId)
         {
             return await _context.MixGroups
                 .Include(mg => mg.MixChannels)
                     .ThenInclude(mc => mc.MixSessions)
+                .Include(mg => mg.MixGroupRoleOpenings.Where(mgro => mgro.IsActive == true))
                 .AsNoTracking()
                 .SingleOrDefaultAsync(mg => mg.Server.DiscordServerId == serverId && mg.Server.IsActive && mg.IsActive == true && mg.MixChannels.Any(mc => mc.DiscordChannelId == channelId));
         }

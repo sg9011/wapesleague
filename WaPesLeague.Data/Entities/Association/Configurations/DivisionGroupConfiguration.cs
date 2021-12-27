@@ -17,6 +17,7 @@ namespace WaPesLeague.Data.Entities.Association.Configurations
             builder.HasMany(dg => dg.DivisionGroupRounds)
                 .WithOne(dgr => dgr.DivisionGroup)
                 .OnDelete(DeleteBehavior.Cascade);
+                
         }
     }
 }

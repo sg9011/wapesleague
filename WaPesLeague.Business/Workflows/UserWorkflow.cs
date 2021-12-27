@@ -46,7 +46,8 @@ namespace WaPesLeague.Business.Workflows
                     var userToCreate = new User()
                     {
                         UserGuid = Guid.NewGuid(),
-                        Email = propsDto.UserName ?? propsDto.UserId.ToString()
+                        DiscordName = propsDto.UserName,
+                        DiscordDiscriminator = propsDto.DiscordDiscriminator
                     };
                     var createdUser = await _userManager.AddAsync(userToCreate);
                     userId = createdUser.UserId;
@@ -61,7 +62,9 @@ namespace WaPesLeague.Business.Workflows
                     DiscordUserName = propsDto.UserName,
                     DiscordNickName = propsDto.NickName,
                     DiscordMention = propsDto.Mention,
-                    DiscordUserId = propsDto.UserId.ToString()
+                    DiscordUserId = propsDto.UserId.ToString(),
+                    ServerJoin = propsDto.ServerJoin,
+                    DiscordJoin = propsDto.DiscordJoin
                 };
                 userId = (await _userMemberManager.AddAsync(userMemberToCreate)).UserId;
 
@@ -137,6 +140,8 @@ namespace WaPesLeague.Business.Workflows
                         userMember.DiscordUserName = string.IsNullOrWhiteSpace(propsDto.UserName) ? userMember.DiscordUserName : propsDto.UserName;
                         userMember.DiscordMention = string.IsNullOrWhiteSpace(propsDto.Mention) ? userMember.DiscordMention : propsDto.Mention;
                         userMember.DiscordNickName = string.IsNullOrWhiteSpace(propsDto.NickName) ? userMember.DiscordNickName : propsDto.NickName;
+                        userMember.DiscordJoin = propsDto.DiscordJoin;
+                        userMember.ServerJoin = propsDto.ServerJoin;
                         userMember = await _userMemberManager.UpdateAsync(userMember);
                     }
                     cacheEntry = userMember.UserId;
@@ -152,6 +157,8 @@ namespace WaPesLeague.Business.Workflows
             return
                 (!string.IsNullOrWhiteSpace(propsDto.UserName) && !string.Equals(userMember.DiscordUserName, propsDto.UserName, StringComparison.InvariantCultureIgnoreCase)) ||
                 (!string.IsNullOrWhiteSpace(propsDto.NickName) && !string.Equals(userMember.DiscordNickName, propsDto.NickName, StringComparison.InvariantCultureIgnoreCase)) ||
+                (userMember.DiscordJoin == null || userMember.DiscordJoin < propsDto.DiscordJoin) ||
+                (propsDto.ServerJoin.HasValue && (userMember.ServerJoin == null || userMember.ServerJoin < propsDto.ServerJoin)) ||
                 (!string.IsNullOrWhiteSpace(propsDto.Mention) && !string.Equals(userMember.DiscordMention, propsDto.Mention, StringComparison.InvariantCultureIgnoreCase));
         }
     }

@@ -8,14 +8,12 @@
     <Compile Remove="Controllers\V1\WeatherForecastController.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="googlesettings.json" />
-  </ItemGroup>
+
 
   <ItemGroup>
-    <None Include="googlesettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+	  <None Update="googlesettings.json">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
   </ItemGroup>
 
   <ItemGroup>

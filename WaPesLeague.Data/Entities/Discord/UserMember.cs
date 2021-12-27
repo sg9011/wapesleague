@@ -1,4 +1,6 @@
-﻿using WaPesLeague.Data.Entities.Discord;
+﻿using System;
+using System.Collections.Generic;
+using WaPesLeague.Data.Entities.Discord;
 
 namespace WaPesLeague.Data.Entities.User
 {
@@ -11,8 +13,13 @@ namespace WaPesLeague.Data.Entities.User
         public string DiscordNickName { get; set; }
         public string DiscordMention { get; set; }
         public string DiscordUserId { get; set; }
+        public DateTime? ServerJoin { get; set; }
+        public DateTime? DiscordJoin { get; set; }
 
         public virtual User User { get; set; }
         public virtual Server Server { get; set; }
+
+        public virtual List<Sniper> Snipers { get; set; }
+        public virtual List<UserMemberServerRole> UserMemberServerRoles { get; set; }
     }
 }

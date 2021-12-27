@@ -20,7 +20,8 @@ namespace WaPesLeague.Business.Mappers.Server
                 .ForMember(dest => dest.DefaultFormation, opt => opt.MapFrom(src => src.ServerFormations.Single(sf => sf.IsDefault == true).Name))
                 .ForMember(dest => dest.DefaultTeams, opt => opt.MapFrom(src => src.DefaultTeams))
                 .ForMember(dest => dest.TimeZoneName, opt => opt.MapFrom(src => src.TimeZoneName))
-                .ForMember(dest => dest.Language, opt => opt.MapFrom(src => src.Language));
+                .ForMember(dest => dest.Language, opt => opt.MapFrom(src => src.Language))
+                .ForMember(dest => dest.ServerSniping, opt => opt.MapFrom(src => src.ServerSnipings != null ? src.ServerSnipings.FirstOrDefault() : null));
 
             CreateMap<ServerTeam, ServerTeamDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))

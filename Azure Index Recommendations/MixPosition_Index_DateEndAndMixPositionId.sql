@@ -1,0 +1,1 @@
+CREATE NONCLUSTERED INDEX [nci_wi_MixPositions_3E1DB6011ED588110EAD5F481ABB3D94] ON [dbo].[MixPositions] ([DateEnd], [MixTeamId]) INCLUDE ([DateStart], [PositionId]) WITH (ONLINE = ON)

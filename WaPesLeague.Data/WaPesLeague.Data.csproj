@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -17,21 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Entities\Association\Competition.cs" />
-    <Compile Remove="Entities\Association\Enums\LeagueType.cs" />
-    <Compile Remove="Entities\Association\Enums\RegistrationType.cs" />
-    <Compile Remove="Entities\Association\Federation.cs" />
-    <Compile Remove="Entities\Association\FederationSeason.cs" />
-    <Compile Remove="Entities\Association\FederationSeasonCompetition.cs" />
-    <Compile Remove="Entities\Association\FederationSeasonCompetitionRound.cs" />
-    <Compile Remove="Entities\Association\FederationSeasonCompetitionRoundSocialMedia.cs" />
-    <Compile Remove="Entities\Association\FederationSeasonRegistration.cs" />
-    <Compile Remove="Entities\Association\FederationSocialMedia.cs" />
+
     <Compile Remove="Entities\Match\MatchPictureType.cs" />
     <Compile Remove="Entities\Match\MatchSocialMedia.cs" />
     <Compile Remove="Entities\User\Configurations\UserPictureTypeConfiguration.cs" />
     <Compile Remove="Entities\User\Configurations\UserSocialMediaConfiguration.cs" />
     <Compile Remove="Entities\User\UserPictureType.cs" />
+   
     <Compile Remove="Entities\User\UserSocialMedia.cs" />
   </ItemGroup>
 

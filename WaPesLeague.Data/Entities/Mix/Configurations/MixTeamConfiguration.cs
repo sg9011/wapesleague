@@ -18,6 +18,10 @@ namespace WaPesLeague.Data.Entities.Mix.Configurations
             builder.HasMany(mt => mt.Formation)
                 .WithOne(f => f.MixTeam)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(mt => mt.MixTeamRoleOpenings)
+                .WithOne(mtro => mtro.MixTeam)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

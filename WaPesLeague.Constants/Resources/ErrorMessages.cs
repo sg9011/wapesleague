@@ -20,6 +20,8 @@ namespace WaPesLeague.Constants.Resources
         public Dictionary<string, string> FormationPositionUnknown { get; set; }
         public Dictionary<string, string> FormationUnknown { get; set; }
         public Dictionary<string, string> InvalidBoolValue { get; set; }
+        public Dictionary<string, string> InvalidPercentageValue { get; set; }
+        public Dictionary<string, string> InvalidSnipingValues { get; set; }
         public Dictionary<string, string> InvalidTimesForMixRoom { get; set; }
         public Dictionary<string, string> InvalidTimeValue { get; set; }
         public Dictionary<string, string> NewPositionEmpty { get; set; }
@@ -36,8 +38,10 @@ namespace WaPesLeague.Constants.Resources
         public Dictionary<string, string> NoPlatformFoundForCode { get; set; }
         public Dictionary<string, string> NoPositionFoundInTeam { get; set; }
         public Dictionary<string, string> NotAllowedToDeletePositionCode { get; set; }
+        public Dictionary<string, string> NotSnipingAgain { get; set; }
         public Dictionary<string, string> NoTeamFound { get; set; }
         public Dictionary<string, string> NothingToClose { get; set; }
+        public Dictionary<string, string> NothingToDelete { get; set; }
         public Dictionary<string, string> NoTimeZoneFound { get; set; }
         public Dictionary<string, string> NoTimeZoneFoundForCode { get; set; }
         public Dictionary<string, string> OldPositionEmpty { get; set; }

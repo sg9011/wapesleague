@@ -9,6 +9,7 @@ namespace WaPesLeague.Data.Entities.Association
         public int UserId { get; set; }
         public int AssociationTenantId { get; set; }
         public DateTime DateCreated { get; set; }
+        public string Name { get; set; }
 
         public virtual User.User User { get; set; }
         public virtual AssociationTenant AssociationTenant { get; set; }

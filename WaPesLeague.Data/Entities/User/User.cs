@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Localization;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using WaPesLeague.Constants;
@@ -15,6 +14,9 @@ namespace WaPesLeague.Data.Entities.User
     {
         public int UserId { get; set; }
         public Guid UserGuid { get; set; }
+        public string DiscordName { get; set; }
+        public string DiscordDiscriminator { get; set; }
+        public string ExternalId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string ExtraInfo { get; set; }
@@ -23,6 +25,7 @@ namespace WaPesLeague.Data.Entities.User
         public virtual List<MixPositionReservation> MixPositionReservations { get; set; }
         //public virtual List<UserSocialMedia> SocialMedias { get; set; }
         //public virtual List<UserPictureType> PictureTypes { get; set; }
+        public virtual List<UserMetadata> UserMetadatas { get; set; }
         public virtual List<UserPlatform> PlatformUsers { get; set; }
         public virtual List<UserMember> UserMembers { get; set; }
         public virtual List<MixSession> OwnerOfSessions { get; set; }

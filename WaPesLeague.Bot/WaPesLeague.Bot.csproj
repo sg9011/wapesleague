@@ -23,6 +23,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <Content Include="..\Shared\ServerSettings\serversettings.ubuntu.json" Link="serversettings.ubuntu.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\Shared\ServerSettings\serversettings.vmubuntu.json" Link="serversettings.vmubuntu.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -53,6 +61,7 @@
     <ProjectReference Include="..\Base.Bot\Base.Bot.csproj" />
     <ProjectReference Include="..\WaPesLeague.Business\WaPesLeague.Business.csproj" />
     <ProjectReference Include="..\WaPesLeague.Data\WaPesLeague.Data.csproj" />
+    <ProjectReference Include="..\WaPesLeague.GoogleSheets\WaPesLeague.GoogleSheets.csproj" />
   </ItemGroup>
 
 </Project>

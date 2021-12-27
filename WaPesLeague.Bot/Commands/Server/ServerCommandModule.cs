@@ -25,6 +25,30 @@ namespace WaPesLeague.Bot.Commands.Server
             _mapper = mapper;
         }
 
+        [Command("ServerTime"), Aliases("Time", "GetTime", "GetServerTime")]
+        [Description("Get the server time")]
+        public async Task GetServerTimeAsync(CommandContext ctx)
+        {
+            try
+            {
+                if (ctx.Guild == null)
+                {
+                    await ctx.RespondAsync(ErrorMessages.PrivateServerNotAllowedError.GetValueForLanguage());
+                    return;
+                }
+
+                var result = await _serverWorkflow.GetTimeAsync(ctx.Guild.Id, ctx.Guild.Name);
+
+                await ReplyToRequest(ctx.Message, result.Message);
+            }
+            catch (Exception ex)
+            {
+                _ = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
+                await ctx.RespondAsync(string.Format(ErrorMessages.BaseError.GetValueForLanguage(), ex.Message));
+            }
+
+        }
+
         [Command("GetServer"), Aliases("DefaultsServer", "ServerDefaults")]
         [Description("Get the server settings")]
         public async Task GetServerSettings(CommandContext ctx)
@@ -92,6 +116,122 @@ namespace WaPesLeague.Bot.Commands.Server
                 }
 
                 await ctx.RespondAsync(result.Message);
+            }
+            catch (Exception ex)
+            {
+                await ctx.RespondAsync(string.Format(ErrorMessages.BaseError.GetValueForLanguage(), ex.Message));
+            }
+        }
+
+        [Command("GetServerButtons"), Aliases("GetButtons", "GetBtns", "GetServerBtns")]
+        [Description("Get the server buttons")]
+        public async Task GetServerButtonsAsync(CommandContext ctx, [RemainingText] string textToIgnore = null)
+        {
+            try
+            {
+                if (ctx.Guild == null)
+                {
+                    await ctx.RespondAsync(ErrorMessages.PrivateServerNotAllowedError.GetValueForLanguage());
+                    return;
+                }
+
+                var server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
+                if (!await ValidateHasTopTierRolesAsync(ctx))
+                    return;
+
+                var discordCommandProperties = new DiscordCommandProperties(ctx);
+                ServerRequestQueue.Queue.Enqueue(new ServerRequestDto(ServerRequestType.GetServerButtons, discordCommandProperties, server));
+            }
+            catch(Exception ex)
+            {
+                await ctx.RespondAsync(string.Format(ErrorMessages.BaseError.GetValueForLanguage(), ex.Message));
+            }
+        }
+
+        [Command("AddServerButton"), Aliases("AddButton", "AddBtn")]
+        [Description("Add a server button")]
+        public async Task AddServerButtonAsync(CommandContext ctx, [RemainingText] string options = null)
+        {
+            try
+            {
+                if (ctx.Guild == null)
+                {
+                    await ctx.RespondAsync(ErrorMessages.PrivateServerNotAllowedError.GetValueForLanguage());
+                    return;
+                }
+
+                var server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
+                if (!await ValidateHasTopTierRolesAsync(ctx))
+                    return;
+
+                var discordCommandProperties = new DiscordCommandProperties(ctx);
+                ServerRequestQueue.Queue.Enqueue(new ServerRequestDto(ServerRequestType.AddServerButton, discordCommandProperties, server)
+                {
+                    Options = options
+                });
+            }
+            catch (Exception ex)
+            {
+                await ctx.RespondAsync(string.Format(ErrorMessages.BaseError.GetValueForLanguage(), ex.Message));
+            }
+        }
+
+        [Command("DeleteServerButton"), Aliases("DeleteButton", "DeleteBtn", "DelBtn", "RemoveButton", "RemoveBtn")]
+        [Description("Delete a server button")]
+        public async Task DeleteServerButtonAsync(CommandContext ctx, int buttonId)
+        {
+            try
+            {
+                if (ctx.Guild == null)
+                {
+                    await ctx.RespondAsync(ErrorMessages.PrivateServerNotAllowedError.GetValueForLanguage());
+                    return;
+                }
+
+                var server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
+                if (!await ValidateHasTopTierRolesAsync(ctx))
+                    return;
+
+                var discordCommandProperties = new DiscordCommandProperties(ctx);
+                ServerRequestQueue.Queue.Enqueue(new ServerRequestDto(ServerRequestType.DeleteButton, discordCommandProperties, server)
+                {
+                    ServerButtonId = buttonId
+                });
+            }
+            catch (Exception ex)
+            {
+                await ctx.RespondAsync(string.Format(ErrorMessages.BaseError.GetValueForLanguage(), ex.Message));
+            }
+        }
+
+
+        [Command("Sniping"), Aliases("StopSniping", "NoSniping", "PreventSniping")]
+        [Description("Prevent users from always sniping positions!")]
+        public async Task Sniping(CommandContext ctx,
+            [Description("The amount of **minutes** after registration opening that you consider as sniping!")] int snipingInterval,
+            [Description("The amount of **minutes** you want to block a user from signing in into mix bcs of sniping!")] int delaySignup,
+            [Description("The duration of this treatment in **hours**")] int durationInHours)
+        {
+            try
+            {
+                if (ctx.Guild == null)
+                {
+                    await ReplyToFailedRequest(ctx.Message, ErrorMessages.PrivateServerNotAllowedError.GetValueForLanguage());
+                    return;
+                }
+
+                var server = await SetServerCulture(ctx.Guild.Id, ctx.Guild.Name);
+
+                if (!await ValidateHasTopTierRolesAsync(ctx))
+                    return;
+
+                var discordCommandProps = new DiscordCommandProperties(ctx);
+                ServerRequestQueue.Queue.Enqueue(new ServerRequestDto(ServerRequestType.SetSniping, discordCommandProps, server)
+                {
+                    SnipingIntervalAfterRegistrationOpeningInMinutes = snipingInterval,
+                    SnipingSignUpDelayInMinutes = delaySignup,
+                    SnipingSignUpDelayDurationInHours = durationInHours
+                });
             }
             catch (Exception ex)
             {

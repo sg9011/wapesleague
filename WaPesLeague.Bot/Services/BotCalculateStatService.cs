@@ -12,7 +12,7 @@ namespace WaPesLeague.Bot.Services
     public class BotCalculateStatService : BaseBackgroundService<BotCalculateStatService>
     {
         private readonly IServiceProvider _provider;
-        private const int delayMilliSeconds = 72000000; //12hours
+        private const int delayMilliSeconds = 43200000; //12hours
 
         public BotCalculateStatService(ILogger<BotCalculateStatService> logger, IServiceProvider serviceProvider) : base(logger)
         {
@@ -25,7 +25,7 @@ namespace WaPesLeague.Bot.Services
             await Task.Delay(120000); //2min
             while (!stoppingToken.IsCancellationRequested)
             {
-                var nowAtStartOfExecution = DateTime.Now;
+                var nowAtStartOfExecution = DateTime.UtcNow;
                 try
                 {
                     using (var scope = _provider.CreateScope())

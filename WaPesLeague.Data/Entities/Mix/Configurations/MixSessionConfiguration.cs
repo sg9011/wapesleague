@@ -11,6 +11,8 @@ namespace WaPesLeague.Data.Entities.Mix.Configurations
             builder.Property(ms => ms.DateStart).IsRequired(true);
             builder.Property(ms => ms.DateToClose).IsRequired(true);
             builder.Property(ms => ms.DateLastUpdated).IsRequired(false);
+            builder.Property(ms => ms.DateCreated).IsRequired(false);
+            builder.Property(ms => ms.DateStatsCalculated).IsRequired(false);
             builder.Property(ms => ms.CrashCount).IsRequired(true);
             builder.Property(ms => ms.MatchCount).IsRequired(true);
             builder.Property(ms => ms.DateClosed).IsRequired(false);
@@ -34,6 +36,10 @@ namespace WaPesLeague.Data.Entities.Mix.Configurations
 
             builder.HasMany(ms => ms.UserPositionStats)
                 .WithOne(mups => mups.MixSession)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(ms => ms.Snipers)
+                .WithOne(s => s.CatchedOnMixSession)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

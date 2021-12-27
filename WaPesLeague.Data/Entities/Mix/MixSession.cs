@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using WaPesLeague.Data.Entities.Discord;
 
 namespace WaPesLeague.Data.Entities.Mix
 {
@@ -12,6 +13,7 @@ namespace WaPesLeague.Data.Entities.Mix
         public DateTime DateToClose { get; set; }
         public DateTime? DateClosed { get; set; }
         public DateTime? DateStatsCalculated { get; set; }
+        public DateTime? DateCreated { get; set; }
         public int CrashCount { get; set; }
         public int MatchCount { get; set; }
         public DateTime? DateLastUpdated { get; set; } //used to validate crashcount and matchcount
@@ -26,5 +28,6 @@ namespace WaPesLeague.Data.Entities.Mix
         public virtual User.User RoomOwner { get; set; }
 
         public virtual List<MixUserPositionSessionStat> UserPositionStats { get; set; }
+        public virtual List<Sniper> Snipers { get; set; }
     }
 }

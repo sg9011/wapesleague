@@ -20,11 +20,11 @@ namespace Base.Bot.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             stoppingToken.Register(() => Logger.LogDebug("EndPointPingService background service Register Call."));
-            await Task.Delay(BackgroundTimerHelper.TimeSpanInMilliSecondsTillNextRun(delayMilliSeconds / 10, DateTime.Now), stoppingToken);
+            await Task.Delay(BackgroundTimerHelper.TimeSpanInMilliSecondsTillNextRun(delayMilliSeconds / 10, DateTime.UtcNow), stoppingToken);
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var nowAtStartOfExecution = DateTime.Now;
+                var nowAtStartOfExecution = DateTime.UtcNow;
                 try
                 {
                     using (var scope = _provider.CreateScope())

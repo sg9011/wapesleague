@@ -32,8 +32,11 @@ namespace WaPesLeague.Data.Managers
         {
             try
             {
-                _context.UserMemberServerRoles.RemoveRange(userMemberServerRoles);
+                var itemIdsToRemove = userMemberServerRoles.Select(x => x.UserMemberServerRoleId).Distinct().ToList();
+                var userMemberServerRolesToDelete = _context.UserMemberServerRoles.Where(a => itemIdsToRemove.Contains(a.UserMemberServerRoleId)).Select(b => b);
+                _context.UserMemberServerRoles.RemoveRange(userMemberServerRolesToDelete);
                 await _context.SaveChangesAsync();
+
                 return true;
             }
             catch(Exception ex)

@@ -50,7 +50,7 @@ namespace WaPesLeague.Business.Workflows
         public async Task HandleScanForMembersAsync()
         {
             var servers = await _serverManager.GetServersAsync();
-            var activeServers = servers.Where(x => x.IsActive == true).ToList();
+            var activeServers = servers.Where(x => x.IsActive == true && !string.Equals(x.DiscordServerId, "0", StringComparison.InvariantCultureIgnoreCase)).ToList();
             if (!activeServers.Any())
             {
                 Logger.LogWarning("No active servers found in the HandleScanForMembersAsync");
@@ -98,16 +98,16 @@ namespace WaPesLeague.Business.Workflows
                     RoleName = x.Name
                 }).ToList();
 
-                var matchingMember = serverUsers.FirstOrDefault(su => su.UserMembers.Any(um => string.Equals(um.DiscordUserId, member.Id.ToString(), StringComparison.InvariantCultureIgnoreCase)));
+                var userThatHasMatchingMember = serverUsers.FirstOrDefault(su => su.UserMembers.Any(um => string.Equals(um.DiscordUserId, member.Id.ToString(), StringComparison.InvariantCultureIgnoreCase)));
 
-                if (matchingMember != null)
+                if (userThatHasMatchingMember != null)
                 {
-                    await UpdateUserIfNeeded(matchingMember, member);
+                    await UpdateUserIfNeeded(userThatHasMatchingMember, member);
                     var discordCommandProps = new DiscordCommandProperties(member, botUserId);
                     await _userWorkflow.GetOrCreateUserIdByDiscordId(Mapper.Map<DiscordCommandPropsDto>(discordCommandProps));
                     allUserMembersAndRoles.Add(new UserMemberAndServerRolesDto()
                     {
-                        UserMember = matchingMember.UserMembers.First(um => string.Equals(um.DiscordUserId, member.Id.ToString(), StringComparison.InvariantCultureIgnoreCase)),
+                        UserMember = userThatHasMatchingMember.UserMembers.First(um => um.ServerId == activeServer.ServerId && string.Equals(um.DiscordUserId, member.Id.ToString(), StringComparison.InvariantCultureIgnoreCase)),
                         DiscordServerRoleDtos = mappedRoles
                     });
                 }
@@ -238,8 +238,9 @@ namespace WaPesLeague.Business.Workflows
             foreach (var userMemberAndRoles in allUserMembersAndTheirDiscordServerRoles)
             {
                 var hasDiscordRoles = userMemberAndRoles.DiscordServerRoleDtos?.Any() ?? false;
-                var hasRolesinDb = userMemberAndRoles.UserMember.UserMemberServerRoles?.Any() ?? false;
+                
                 var currentUserMemberServerRoles = dbUserMembersAndRoles.Where(dbUm => userMemberAndRoles.UserMember.UserMemberId == dbUm.UserMemberId).ToList();
+                var hasRolesinDb = currentUserMemberServerRoles?.Any() ?? false;
 
                 if (hasDiscordRoles)
                 {
@@ -247,7 +248,7 @@ namespace WaPesLeague.Business.Workflows
                         
                     if (hasRolesinDb)
                     {
-                        newRolesForUser = userMemberAndRoles.DiscordServerRoleDtos.Where(discordRole => currentUserMemberServerRoles.Any(dbRole => string.Equals(discordRole.DiscordRoleId, dbRole.ServerRole.DiscordRoleId, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                        newRolesForUser = userMemberAndRoles.DiscordServerRoleDtos.Where(discordRole => !currentUserMemberServerRoles.Any(dbRole => string.Equals(discordRole.DiscordRoleId, dbRole.ServerRole.DiscordRoleId, StringComparison.InvariantCultureIgnoreCase))).ToList();
                     }
                     else
                     {

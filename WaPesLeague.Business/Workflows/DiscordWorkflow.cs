@@ -225,7 +225,7 @@ namespace WaPesLeague.Business.Workflows
             }
 
             await _serverRoleManager.AddMultipleAsync(serverRolesToAdd);
-            await _serverRoleManager.AddMultipleAsync(serverRolesToUpdate);
+            await _serverRoleManager.UpdateMultipleAsync(serverRolesToUpdate);
             allServerRoles.AddRange(serverRolesToAdd);
         }
 
